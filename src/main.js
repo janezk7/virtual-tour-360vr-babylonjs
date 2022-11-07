@@ -30,12 +30,18 @@ const showInfoPanelOnStart_debug = isDebug && false;
 const showInspector_debug = isDebug && false;
 if(isDebug) {
     document.body.style.overflow = 'unset';
+
+    setTimeout(() => {
+        showEnvironmentOnStart_debug && showEnvironment(0);
+        showInfoPanelOnStart_debug && top.infoPanel.holder.show();
+    }, 500);
 }
 
 console.log(isProduction ? "Production build" : "Development build");
 const domainDirectory = isProduction ? document.getElementById('serverAppDirectory').value : "./";
 const defaultEnvironmentsJsonUri = domainDirectory + 'Resources/environmentDefinitions.json';
 const localizedStringsJsonUri = domainDirectory + 'Resources/localizedAppStrings.json';
+const appSettingsJsonUri = domainDirectory + 'Resources/appSettings.json';
 
 //////////////////////
 // GLOBAL variables //
@@ -81,8 +87,8 @@ top.is3dElementInteractionDisabled = () => {
     return top.isBlocking3dElements || (top.isInfoPanelOpen && isMobile);
 }
 
-// Load localization texts
-initializeLocalization(localizedStringsJsonUri);
+// Load App settings (localization, theme, colors, font color)
+initializeAppSettings(appSettingsJsonUri);
 
 // Load environments
 initializeEnvironments(defaultEnvironmentsJsonUri);
@@ -90,10 +96,7 @@ initializeEnvironments(defaultEnvironmentsJsonUri);
 // Initialize the 3D engine and scene
 let canvas = document.getElementById('renderCanvas');
 setupEngine(canvas);
-
 setupScene(top.engine, canvas);
-
-
 
 function setupEngine(canvas) {
     top.engine = new BABYLON.Engine(canvas, true, {preserveDrawingBuffer: true, stencil: true});
@@ -345,7 +348,7 @@ function addScreenUI(advancedTexture) {
     */
 }
 
-// Creates info panel. Load localized strings first!
+// Creates info panel
 function initializeInfoPanel(localizedStrings) {
     let {adinfoPanel, tbTitle, tbDesc, image, btnLink} = createContentPanelFullScreen(scene, localizedStrings);
     top.infoPanel = {holder: adinfoPanel, tbTitle, tbDesc, image, btnLink};
@@ -399,24 +402,49 @@ function initializeEnvironments(defaultEnvironmentsJsonUri) {
         }).catch((reason) => {console.log("Error loading environments. Please check that environmentDefinitions.json is in Resources folder and you have permissions", reason)});
 }
 
-function initializeLocalization(localizedStringsJsonUri) {
+function initializeAppSettings(appSettingsJsonUri) {
     let reader = new FileReader();
     reader.onload = function() {
         try {
-            let importedStrings = JSON.parse(reader.result);
+            let importedSettings = JSON.parse(reader.result);
             //console.log("Imported strings: ", importedStrings);
-            top.localizedStrings = importedStrings;
-
-            // call initialization operations that require localization
-            localizeAppTexts(importedStrings);
-            initializeInfoPanel(importedStrings);
+            top.appSettings = importedSettings;
+            
+            // Load localization texts
+            initializeLocalization(localizedStringsJsonUri, () => {
+                // Call initialization operations that require localization
+                localizeAppTexts(top.localizedStrings);
+                initializeInfoPanel(top.localizedStrings);
+            });
         } catch(ex) {
             console.log("Invalid json file structure when loading localized strings. Please check contents.");
             console.log("Localization initialization failed: ", ex);
         }
     }
 
-    console.log("Fetching: " + localizedStringsJsonUri);
+    console.log("1. Fetching settings: " + appSettingsJsonUri);
+    fetch(appSettingsJsonUri)
+        .then(res => res.blob())
+        .then(blob => {
+            reader.readAsText(blob);
+        }).catch((reason) => {console.log("Error loading app settings: ", reason)});
+}
+
+function initializeLocalization(localizedStringsJsonUri, onLoadCallback) {
+    let reader = new FileReader();
+    reader.onload = function() {
+        try {
+            let importedStrings = JSON.parse(reader.result);
+            console.log("3. Imported strings: ", importedStrings);
+            top.localizedStrings = importedStrings;
+            onLoadCallback && onLoadCallback();
+        } catch(ex) {
+            console.log("Invalid json file structure when loading localized strings. Please check contents.");
+            console.log("Localization initialization failed: ", ex);
+        }
+    }
+
+    console.log("2. Fetching localizatoin: " + localizedStringsJsonUri);
     fetch(localizedStringsJsonUri)
         .then(res => res.blob())
         .then(blob => {
@@ -442,10 +470,6 @@ export function setupSceneEnvironments(envDefinitions) {
     // Generate environments from definitions
     top.environments = getEnvironments(envDefinitions);
     top.loadedEnvironmentDefinitions = envDefinitions;
-
-    // Set first environment
-    showEnvironmentOnStart_debug && showEnvironment(0);
-    showInfoPanelOnStart_debug && top.infoPanel.holder.show();
 
     populateDestinationSelect();
     populateDestinationList();

@@ -86,10 +86,11 @@ export function createContentPanelFullScreen(scene, localizedStrings) {
 
     // Common constants
     let titleFontSize = 16;
-    let descFontSize = 12;
+    let descFontSize = 14;
     let padding = 10;
-    let textColor = "black";
-    let defaultColor = "#6400c1";
+    let textColor = top.appSettings.fontColor; // "black";
+    let defaultColor = top.appSettings.primaryColor; // "#6400c1";
+    let fontFamily = top.appSettings.fontFamily;
     let controlWidthPrc = 0.9;
     let horAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
     let verAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
@@ -114,7 +115,8 @@ export function createContentPanelFullScreen(scene, localizedStrings) {
     var rectBackground = new GUI.Rectangle("backgroundRect");
     rectRoot.addControl(rectBackground);
     rectBackground.isPointerBlocker = true;
-    rectBackground.background = "white";
+    rectBackground.background = top.appSettings.secondaryColor;
+    rectBackground.color = "transparent";
     rectBackground.alpha = 1; // 0.85;
     
     // Create stacking panel
@@ -201,7 +203,7 @@ export function createContentPanelFullScreen(scene, localizedStrings) {
     tbTitle.verticalAlignment = verAlignment;
     tbTitle.textHorizontalAlignment = horAlignment;
     tbTitle.textVerticalAlignment = verAlignment;
-    tbTitle.fontFamily = "'Roboto'";
+    tbTitle.fontFamily = fontFamily;
     tbTitle.fontWeight = "bold";
     tbTitle.textWrapping = GUI.TextWrapping.Ellipsis;
 
@@ -272,7 +274,7 @@ export function createContentPanelFullScreen(scene, localizedStrings) {
         tsv.verticalBar.value = scrollYValue;
     });
 
-    var tbDesc = new GUI.TextBlock("infoDescription", "Product description:\nVarious rubber parts, grommets, large bellows, suction cups, ALU grippers,… \n\nApplication:\nTelecommunications, railways, machinery, automation, sanitary equipment,… \n\nProduction technology:\n100% automated / semi-automated / manual injection molding & metal processing \n\nVisual checking:\nManual");
+    var tbDesc = new GUI.TextBlock("infoDescription", "Lorem ipsum dolor sit amet, \nconsectetur adipiscing elit. Sed aliquam elementum ligula non laoreet. Proin urna tortor, aliquet consequat rutrum id, volutpat eget felis. Proin molestie tellus non neque vestibulum laoreet sit amet vel lorem. Morbi faucibus ut risus quis venenatis. Aliquam quis tempor odio,");
     tsv.addControl(tbDesc);
     tbDesc.color = textColor;
     tbDesc.fontSizeInPixels = descFontSize;
@@ -284,7 +286,7 @@ export function createContentPanelFullScreen(scene, localizedStrings) {
     tbDesc.textHorizontalAlignment = horAlignment;
     tbDesc.textVerticalAlignment = verAlignment;
     tbDesc.textWrapping = GUI.TextWrapping.WordWrap;
-    tbDesc.fontFamily = "'Roboto'";
+    tbDesc.fontFamily = fontFamily;
 
     // Info.Link
     var btnLink = GUI.Button.CreateSimpleButton("linkButton", "");
@@ -293,9 +295,9 @@ export function createContentPanelFullScreen(scene, localizedStrings) {
     btnLink.heightInPixels = 25;
     btnLink.background = defaultColor;
     btnLink.color = "transparent";
-    btnLink.fontSizeInPixels = 12;
-    btnLink.fontWeight = "bold";
-    btnLink.fontFamily = "'Roboto'";
+    btnLink.fontSizeInPixels = 15;
+    //btnLink.fontWeight = "bold";
+    btnLink.fontFamily = fontFamily;
     btnLink.topInPixels = -10;
     btnLink.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
     btnLink.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
@@ -447,6 +449,7 @@ export function createContentPanel(scene, localizedStrings) {
     let verAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
     let buttonHeight = 60; // in pixels
     let buttonWidth = 300; // // in pixels
+    let fontFamily = "Arial";
 
     // Info.Title
     var tbTitle = new GUI.TextBlock("infoTitle", "Sample title");
@@ -458,7 +461,7 @@ export function createContentPanel(scene, localizedStrings) {
     tbTitle.verticalAlignment = verAlignment;
     tbTitle.textHorizontalAlignment = horAlignment;
     tbTitle.textVerticalAlignment = verAlignment;
-    tbTitle.fontFamily = "'Roboto'";
+    tbTitle.fontFamily = fontFamily;
     tbTitle.fontWeight = "bold";
 
     // Info.Description
@@ -473,7 +476,7 @@ export function createContentPanel(scene, localizedStrings) {
     tbDesc.textHorizontalAlignment = horAlignment;
     tbDesc.textVerticalAlignment = verAlignment;
     tbDesc.textWrapping = GUI.TextWrapping.WordWrap;
-    tbDesc.fontFamily = "'Roboto'";
+    tbDesc.fontFamily = fontFamily;
 
     // Info.Image
     var image = new GUI.Image("infoImg", "./Resources/sample-image.png");
@@ -501,7 +504,7 @@ export function createContentPanel(scene, localizedStrings) {
     btnLink.color = "transparent";
     btnLink.fontSizeInPixels = 26;
     btnLink.fontWeight = "bold";
-    btnLink.fontFamily = "'Roboto'";
+    btnLink.fontFamily = fontFamily;
     btnLink.topInPixels = -25;
     //btnLink.left = "-20%";
     btnLink.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
@@ -558,7 +561,7 @@ export function createContentPanel(scene, localizedStrings) {
     btnClose.color = "white";
     btnClose.fontSizeInPixels = 26;
     btnClose.fontWeight = "bold";
-    btnClose.fontFamily = "'Roboto'";
+    btnClose.fontFamily = fontFamily;
     btnClose.topInPixels = -25;
     btnClose.left = "20%";
     btnClose.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
