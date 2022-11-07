@@ -1,0 +1,13 @@
+{
+	"_lockedPass": "thankyou",
+	"enter": "'ENTER",
+	"close": "'CLOSE",
+	"moreInfo": "'MORE INFO",
+	"areaRestricted": "'Area restricted",
+	"areaRestrictedMessage": "'Please enter password to access this area or send an inquiry to get one.",
+	"password": "'Password",
+	"getPassword": "'Get password",
+	"loginSuccessfulMessage": "'Success!",
+	"welcomeMessage": "'Welcome! Thanks for signing up.",
+	"wrongPasswordMessage": "'Invalid password. Please try again or send inquiry"
+}
