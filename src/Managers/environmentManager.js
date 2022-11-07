@@ -54,7 +54,7 @@ function getHotspots(environmentDefinition, allEnvironments) {
             
             // Create hotspot button and parent to marker
             var isDestinationLocked = allEnvironments[marker.destIndex].isLocked;
-            let btnObj = create3dHotspot(btnBaseName, marker.text, isDestinationLocked, marker.destIndex, marker.isLeft);
+            let btnObj = create3dHotspot(btnBaseName, marker.text, isDestinationLocked, marker.destIndex, marker.isLeft, marker.cameraOffsetDegrees);
             globeMarker.addChild(btnObj.mesh);
             btnObj.mesh.position = new BABYLON.Vector3.Zero();
         
@@ -65,6 +65,7 @@ function getHotspots(environmentDefinition, allEnvironments) {
                 displayText: marker.text,
                 isLeft: marker.isLeft,
                 dest: marker.dest,
+                cameraOffsetDegrees: marker.cameraOffsetDegrees,
                 meshMarker: globeMarker, 
                 guiElement: btnObj.uiElement
             });

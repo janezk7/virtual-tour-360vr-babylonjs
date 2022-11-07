@@ -25,17 +25,19 @@ export function toggleHotspotPlacingMode(isLeft) {
     top.pickingDomeMesh.isPickable = top.hotspotManager.isPlacingMode;
 }
 
-export function create3dHotspot(controlName, hotspotText, isLocked, destinationIndex, isLeft) {
+export function create3dHotspot(controlName, hotspotText, isLocked, destinationIndex, isLeft, cameraOffsetDegrees) {
     let mesh = BABYLON.MeshBuilder.CreateSphere("sphere_" + controlName, {});
     mesh.scaling = new BABYLON.Vector3(30,30,30);
     mesh.visibility = 0;
     mesh.billboardMode = BABYLON.TransformNode.BILLBOARDMODE_Y + BABYLON.TransformNode.BILLBOARDMODE_X;
     
     let meshBtnUI = new GUI.MeshButton3D(mesh, "meshbtn_" + controlName);
-    meshBtnUI.destinationIndex = destinationIndex;
+    meshBtnUI.destinationNavigationData = {destinationIndex, cameraOffsetDegrees};
     meshBtnUI.onPointerDownObservable.add((evData, eventState) => {
         if(top.is3dElementInteractionDisabled()) return;
-        top.showEnvironment(eventState.currentTarget.destinationIndex);
+
+        let data = eventState.currentTarget.destinationNavigationData;
+        top.showEnvironment(data.destinationIndex, data.cameraOffsetDegrees);
         top.setPointer(false); // Fixes bug: cursor stays pointer after click on locked environment
     });
     meshBtnUI.onPointerEnterObservable.add(() => {
@@ -106,6 +108,7 @@ export function hotspotManagerCastRayHandler() {
 
         let hotspotText = document.getElementById('inputHotspotName').value;
         let destSelect = document.getElementById('selectDestinationEnvironment'); 
+        let cameraOffsetDegrees = document.getElementById("inputCameraOffsetDegrees").value;
         let hotspotDest = destSelect.options[destSelect.selectedIndex].text;
         let destinationIndex = top.environments.getIndexByName(hotspotDest);
         if(destinationIndex == null) {
@@ -119,7 +122,7 @@ export function hotspotManagerCastRayHandler() {
         // Define hotspot
         let marker = new BABYLON.Mesh("mesh_" + hotspotBaseName, scene);
         marker.position = hit.pickedPoint;
-        var hotspotObj = create3dHotspot(hotspotBaseName, hotspotText, isDestinationLocked, destinationIndex, isLeft);
+        var hotspotObj = create3dHotspot(hotspotBaseName, hotspotText, isDestinationLocked, destinationIndex, isLeft, cameraOffsetDegrees);
         marker.addChild(hotspotObj.mesh);
         hotspotObj.mesh.position = new BABYLON.Vector3.Zero();
 

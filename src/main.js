@@ -25,14 +25,16 @@ if(showDevelopmentTools) {
 
 // Debug fields
 const isDebug = true;
-const showEnvironmentOnStart_debug = isDebug && false;
+const resetCameraOnNavigation = true;
+const showEnvironmentOnStart_debug = isDebug && true;
 const showInfoPanelOnStart_debug = isDebug && false;
-const showInspector_debug = isDebug && false;
+const showInspector_debug = isDebug && true;
+const environmentToShow_debug = 2;
 if(isDebug) {
     document.body.style.overflow = 'unset';
 
     setTimeout(() => {
-        showEnvironmentOnStart_debug && showEnvironment(0);
+        showEnvironmentOnStart_debug && showEnvironment(environmentToShow_debug);
         showInfoPanelOnStart_debug && top.infoPanel.holder.show();
     }, 500);
 }
@@ -174,6 +176,11 @@ function createScene(engine, canvas) {
     camera.resetToInitial = () => {
         top.camera.alpha = -Math.PI / 2;
         top.camera.beta = Math.PI / 2;
+    }
+    camera.setAlphaRotation = (degrees) => {
+        let rad = degrees * (Math.PI/180);
+        console.log("setting to "+ rad + " radians");
+        top.camera.alpha = rad;
     }
     
     // Load textures and materials
@@ -498,7 +505,7 @@ export function showInfoPanel(title, description, imageUrl, linkUrl) {
     panel.holder.show();
 }
 
-export function showEnvironment(indexToShow) {
+export function showEnvironment(indexToShow, offsetCameraDegrees) {
     var overlay = document.getElementById("canvasOverlay");
     if(overlay) overlay.style.display = "none";
 
@@ -508,6 +515,7 @@ export function showEnvironment(indexToShow) {
     }
 
     // Handle locked environment
+    console.log(indexToShow);
     let isLocked = top.environments[indexToShow].isLocked;
     if(isLocked && !top.isAuthorized) {
         top.toggleFullscreen(false); // Exit fullscreen. Necessary to display login form
@@ -563,7 +571,13 @@ export function showEnvironment(indexToShow) {
     });
     top.environments[indexToShow].tags.forEach(t => t.guiElement.isVisible = true);
 
-    top.camera.resetToInitial();
+    // Set camera orientation
+    if(resetCameraOnNavigation)
+        top.camera.resetToInitial();
+
+    if(offsetCameraDegrees) {
+        top.camera.setAlphaRotation(offsetCameraDegrees);
+    }
 
     top.onEnvironmentChanged();
 }
