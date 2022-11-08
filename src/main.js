@@ -29,6 +29,7 @@ const resetCameraOnNavigation = true;
 const showEnvironmentOnStart_debug = isDebug && true;
 const showInfoPanelOnStart_debug = isDebug && false;
 const showInspector_debug = isDebug && true;
+const showCameraAlphaIndicator_debug = isDebug && true;
 const environmentToShow_debug = 2;
 if(isDebug) {
     document.body.style.overflow = 'unset';
@@ -36,7 +37,7 @@ if(isDebug) {
     setTimeout(() => {
         showEnvironmentOnStart_debug && showEnvironment(environmentToShow_debug);
         showInfoPanelOnStart_debug && top.infoPanel.holder.show();
-    }, 500);
+    }, 1000);
 }
 
 console.log(isProduction ? "Production build" : "Development build");
@@ -102,7 +103,6 @@ setupScene(top.engine, canvas);
 
 function setupEngine(canvas) {
     top.engine = new BABYLON.Engine(canvas, true, {preserveDrawingBuffer: true, stencil: true});
-
     top.engine.resize();
     setCanvasSize();
 
@@ -302,7 +302,7 @@ function createScene(engine, canvas) {
 };
 
 function addScreenUI(advancedTexture) {
-    // Show logo
+    // Logo
     var logo = new GUI.Image("logo", domainDirectory + "Textures/logo.png")
     //logo.width = "96px";
     //logo.height = "72px";
@@ -339,6 +339,24 @@ function addScreenUI(advancedTexture) {
         top.setPointer(false);
     });
     advancedTexture.addControl(btn);
+
+    // Camera orientation helper display
+    if(showCameraAlphaIndicator_debug) {
+        let tbDegrees = new GUI.TextBlock("tbCamDegreesText", "0 degrees");
+        tbDegrees.textVerticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        tbDegrees.topInPixels = 10;
+        tbDegrees.color = "#00ff00";
+        advancedTexture.addControl(tbDegrees);
+        console.log(top.camera);
+
+        window.setInterval(function() {
+            let rad = (top.camera.alpha % 6.0);
+            rad += rad < 0 ? 6 : 0;
+            rad = Math.round(rad * 1000) / 1000;
+            let degrees = Math.round(rad * 180 / Math.PI) % 360;
+            tbDegrees.text = `${degrees} degrees (${rad} radian)`;
+        }, 100);
+    }
 
     // Debugging rect
     /*

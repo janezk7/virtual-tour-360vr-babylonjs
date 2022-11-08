@@ -130,6 +130,7 @@ export function hotspotManagerCastRayHandler() {
             displayText: hotspotText,
             isLeft: isLeft,
             dest: hotspotDest,
+            cameraOffsetDegrees: cameraOffsetDegrees,
             meshMarker: marker, 
             guiElement: hotspotObj.uiElement 
         };

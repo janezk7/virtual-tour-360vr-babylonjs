@@ -12,7 +12,8 @@ export function exportEnvironments(environments) {
                 text: m.displayText,
                 isLeft: m.isLeft,
                 pos: m.meshMarker.position,
-                dest: m.dest
+                dest: m.dest,
+                cameraOffsetDegrees: m.cameraOffsetDegrees
             })
         );
 
