@@ -25,7 +25,7 @@ export function toggleHotspotPlacingMode(isLeft) {
     top.pickingDomeMesh.isPickable = top.hotspotManager.isPlacingMode;
 }
 
-export function create3dHotspot(controlName, hotspotText, isLocked, destinationIndex, isLeft, cameraOffsetDegrees) {
+export function create3dHotspot(controlName, hotspotText, isLocked, destinationIndex, isStepType, isLeft, cameraOffsetDegrees) {
     let mesh = BABYLON.MeshBuilder.CreateSphere("sphere_" + controlName, {});
     mesh.scaling = new BABYLON.Vector3(30,30,30);
     mesh.visibility = 0;
@@ -72,6 +72,8 @@ export function create3dHotspot(controlName, hotspotText, isLocked, destinationI
         upAnimation();
     }
 
+    // TODO: Handle step type hotspots
+
     // Create icon
     const imgGraphic = createIconGraphic(false, isLeft);
     mesh.addChild(imgGraphic);
@@ -106,6 +108,7 @@ export function hotspotManagerCastRayHandler() {
         let currentEnvironment = top.environments[top.currentEnvironmentIndex];
         let hotspotBaseName = getHotspotName(currentEnvironment.name, currentEnvironment.hotspots.length);
 
+        let isStepHotspot = document.getElementById("cbIsStepHotspot").checked;
         let hotspotText = document.getElementById('inputHotspotName').value;
         let destSelect = document.getElementById('selectDestinationEnvironment'); 
         let cameraOffsetDegrees = document.getElementById("inputCameraOffsetDegrees").value;
@@ -122,12 +125,13 @@ export function hotspotManagerCastRayHandler() {
         // Define hotspot
         let marker = new BABYLON.Mesh("mesh_" + hotspotBaseName, scene);
         marker.position = hit.pickedPoint;
-        var hotspotObj = create3dHotspot(hotspotBaseName, hotspotText, isDestinationLocked, destinationIndex, isLeft, cameraOffsetDegrees);
+        var hotspotObj = create3dHotspot(hotspotBaseName, hotspotText, isDestinationLocked, destinationIndex, isStepHotspot, isLeft, cameraOffsetDegrees);
         marker.addChild(hotspotObj.mesh);
         hotspotObj.mesh.position = new BABYLON.Vector3.Zero();
 
         let hotspotObject = {
             displayText: hotspotText,
+            isStepType: isStepHotspot,
             isLeft: isLeft,
             dest: hotspotDest,
             cameraOffsetDegrees: cameraOffsetDegrees,

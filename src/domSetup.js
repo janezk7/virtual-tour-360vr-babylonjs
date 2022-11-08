@@ -15,7 +15,6 @@ import { exportEnvironments } from "./Utilities/exportManager";
 var canvas = document.getElementById('renderCanvas')
 
 export function initializeDOM(domainDirectory, showDevelopmentTools) {
-    console.log("initializing DOM");
     // Ensure jQuery
     /*
     if(typeof jQuery == 'undefined') {

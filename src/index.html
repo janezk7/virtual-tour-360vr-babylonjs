@@ -63,7 +63,10 @@
                 <button class="nav-link" id="import-tab" data-bs-toggle="tab" data-bs-target="#import" type="button" role="tab" aria-controls="import" aria-selected="false">Import</button>
               </li>
               <li class="nav-item" role="presentation">
-                <button class="nav-link" id="tagging-tab" data-bs-toggle="tab" data-bs-target="#tagging" type="button" role="tab" aria-controls="tagging" aria-selected="false">Tagging</button>
+                <button class="nav-link" id="hotspotting-tab" data-bs-toggle="tab" data-bs-target="#hotspotting" type="button" role="tab" aria-controls="hotspotting" aria-selected="false">New hotspot</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tagging-tab" data-bs-toggle="tab" data-bs-target="#tagging" type="button" role="tab" aria-controls="tagging" aria-selected="false">New info tag</button>
               </li>
               <li class="nav-item" role="presentation">
                 <button class="nav-link" id="registerenvironment-tab" data-bs-toggle="tab" data-bs-target="#registerenvironment" type="button" role="tab" aria-controls="registerenvironment" aria-selected="false">Register Environment</button>
@@ -112,8 +115,12 @@
                   <button style="width: 100%;" type="button" class="btn btn-primary col" id="btnToggleTagLeft">Place tag (Left)</button>
                   <button style="width: 100%;" type="button" class="btn btn-primary col" id="btnToggleTagRight">Place tag (Right)</button>
                 </div>
+              </div>
+              <div class="tab-pane " id="hotspotting" role="tabpanel" aria-labelledby="tagging-tab">
                 <div class="row mb-3">
                   <h2>Hotspotting</h2>
+                  <input type="checkbox" id="cbIsStepHotspot" name="cbIsStepHotspot" value="isStepHotspot" style="width: 50px; margin: 10px">
+                  <label for="cbIsStepHotspot" class="form-label" style="text-align: left; width:auto; margin-top: 10px;"> Step hotspot</label>
                   <label for="hotspotText" class="form-label" style="text-align: left;">Hotspot text</label>
                   <input name="hotspotText" class="form-control" id="inputHotspotName" width="250px" placeholder="e.g.: To Workplace" value="Sample environment navigation text" />
                   <label for="destinationName" class="form-label" style="text-align: left;">Destination Name</label>
@@ -135,7 +142,7 @@
                   <input name="envName" class="form-control" id="inputEnvName" width="250px" placeholder="e.g.: envHome" value="" />
                   <div></div>
                   <label for="envUri" class="form-label" style="text-align: left;">Environment file url</label>
-                  <input name="envUri" class="form-control" id="inputEnvUrl" width="250px" placeholder="e.g.: https://example.com/my360video.mp4" value="https://yoda.blob.core.windows.net/videos/uptale360.mp4" />
+                  <input name="envUri" class="form-control" id="inputEnvUrl" width="250px" placeholder="e.g.: https://example.com/my360video.mp4" value="./Resources/Images/sample-image.png" />
                   <button type="button" class="btn btn-primary" id="btnAddEnvironment" >Register environment</button>
                   <p id="addEnvironmentFeedback"></p>
                 </div>

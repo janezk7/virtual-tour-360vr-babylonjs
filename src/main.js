@@ -10,10 +10,17 @@ import { initializeDOM, setCanvasSize } from './domSetup';
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 
-// App settings
+// Deployment
 const isProduction = false; // For loading definitions
 const showDevelopmentTools = true;
 const isDeployingToDnn = false;
+
+// App Settings
+const initialEnvironmentIndex = 0;
+const useInitialCameraAlpha = false;
+const initialCameraAlpha = 3.45;
+const resetCameraOnNavigation = false;
+const useDestinationCameraOffsetOnNavigation = false; // Takes priority over reset
 
 // Document setup
 if(isDeployingToDnn) {
@@ -25,19 +32,13 @@ if(showDevelopmentTools) {
 
 // Debug fields
 const isDebug = true;
-const resetCameraOnNavigation = true;
 const showEnvironmentOnStart_debug = isDebug && true;
+const environmentToShow_debug = 3;
 const showInfoPanelOnStart_debug = isDebug && false;
 const showInspector_debug = isDebug && true;
 const showCameraAlphaIndicator_debug = isDebug && true;
-const environmentToShow_debug = 2;
 if(isDebug) {
     document.body.style.overflow = 'unset';
-
-    setTimeout(() => {
-        showEnvironmentOnStart_debug && showEnvironment(environmentToShow_debug);
-        showInfoPanelOnStart_debug && top.infoPanel.holder.show();
-    }, 1000);
 }
 
 console.log(isProduction ? "Production build" : "Development build");
@@ -90,21 +91,36 @@ top.is3dElementInteractionDisabled = () => {
     return top.isBlocking3dElements || (top.isInfoPanelOpen && isMobile);
 }
 
-// Load App settings (localization, theme, colors, font color)
-initializeAppSettings(appSettingsJsonUri);
-
-// Load environments
-initializeEnvironments(defaultEnvironmentsJsonUri);
-
 // Initialize the 3D engine and scene
 let canvas = document.getElementById('renderCanvas');
 setupEngine(canvas);
-setupScene(top.engine, canvas);
+
+// Load App settings (localization, theme, colors, font color)
+initializeAppSettings(appSettingsJsonUri, () => {
+    // Load localization texts
+    initializeLocalization(localizedStringsJsonUri, () => {
+        // Localize texts, setup scene, setup enviroments and 
+        localizeAppTexts(top.localizedStrings);
+
+        setupScene(top.engine, canvas);
+        initializeInfoPanel(top.localizedStrings);
+        initializeEnvironments(defaultEnvironmentsJsonUri, () => {
+            // Other initialization code...
+            showEnvironment(initialEnvironmentIndex);
+
+            if(isDebug) {
+                showEnvironmentOnStart_debug && showEnvironment(environmentToShow_debug);
+                showInfoPanelOnStart_debug && top.infoPanel.holder.show();
+            }
+        });
+    });
+});
+
 
 function setupEngine(canvas) {
     top.engine = new BABYLON.Engine(canvas, true, {preserveDrawingBuffer: true, stencil: true});
     top.engine.resize();
-    setCanvasSize();
+    setCanvasSize(); // TODO: Needed ? already called in setupScene
 
     // Trying to fix text blurriness
     //engine.setHardwareScalingLevel(0.5);
@@ -174,7 +190,7 @@ function createScene(engine, canvas) {
     camera.attachControl(canvas, true);
     camera.inputs.attached.mousewheel.detachControl(canvas);
     camera.resetToInitial = () => {
-        top.camera.alpha = -Math.PI / 2;
+        top.camera.alpha = useInitialCameraAlpha ? initialCameraAlpha : (-Math.PI / 2);
         top.camera.beta = Math.PI / 2;
     }
     camera.setAlphaRotation = (degrees) => {
@@ -347,14 +363,22 @@ function addScreenUI(advancedTexture) {
         tbDegrees.topInPixels = 10;
         tbDegrees.color = "#00ff00";
         advancedTexture.addControl(tbDegrees);
-        console.log(top.camera);
-
-        window.setInterval(function() {
-            let rad = (top.camera.alpha % 6.0);
+        let getRadianNormalized = (rad) => {
+            rad = (rad % 6.0);
             rad += rad < 0 ? 6 : 0;
             rad = Math.round(rad * 1000) / 1000;
-            let degrees = Math.round(rad * 180 / Math.PI) % 360;
-            tbDegrees.text = `${degrees} degrees (${rad} radian)`;
+            return rad;
+        }
+        window.setInterval(function() {
+            let rad_alpha = getRadianNormalized(top.camera.alpha);
+            let degrees_alpha = Math.round(rad_alpha * 180 / Math.PI) % 360;
+            tbDegrees.text = `Alpha: ${degrees_alpha} degrees (${rad_alpha} radian)`;
+
+            /*
+            let rad_beta = getRadianNormalized(top.camera.beta);
+            let degrees_beta = Math.round(rad_beta * 180 / Math.PI) % 360;
+            tbDegrees.text += `\nBeta: ${degrees_beta} degrees (${rad_beta} radian)`;
+            */
         }, 100);
     }
 
@@ -406,13 +430,14 @@ function onEnvironmentChanged() {
     }
 }
 
-function initializeEnvironments(defaultEnvironmentsJsonUri) {
+function initializeEnvironments(defaultEnvironmentsJsonUri, onLoadCallback) {
     let reader = new FileReader();
     reader.onload = function(){
         try {
             let importedEnvironments = JSON.parse(reader.result);
             //console.log("Imported: ", importedEnvironments);
             setupSceneEnvironments(importedEnvironments);
+            onLoadCallback && onLoadCallback();
         } catch(ex) {
             //console.log("Invalid json file structure when loading environments. Please check contents.");
             console.log("Import environments failed: ", ex);
@@ -427,27 +452,21 @@ function initializeEnvironments(defaultEnvironmentsJsonUri) {
         }).catch((reason) => {console.log("Error loading environments. Please check that environmentDefinitions.json is in Resources folder and you have permissions", reason)});
 }
 
-function initializeAppSettings(appSettingsJsonUri) {
+function initializeAppSettings(appSettingsJsonUri, onLoadCallback) {
     let reader = new FileReader();
     reader.onload = function() {
         try {
             let importedSettings = JSON.parse(reader.result);
             //console.log("Imported strings: ", importedStrings);
             top.appSettings = importedSettings;
-            
-            // Load localization texts
-            initializeLocalization(localizedStringsJsonUri, () => {
-                // Call initialization operations that require localization
-                localizeAppTexts(top.localizedStrings);
-                initializeInfoPanel(top.localizedStrings);
-            });
+            onLoadCallback && onLoadCallback();
         } catch(ex) {
             console.log("Invalid json file structure when loading localized strings. Please check contents.");
             console.log("Localization initialization failed: ", ex);
         }
     }
 
-    console.log("1. Fetching settings: " + appSettingsJsonUri);
+    console.log("Fetching settings: " + appSettingsJsonUri);
     fetch(appSettingsJsonUri)
         .then(res => res.blob())
         .then(blob => {
@@ -460,7 +479,6 @@ function initializeLocalization(localizedStringsJsonUri, onLoadCallback) {
     reader.onload = function() {
         try {
             let importedStrings = JSON.parse(reader.result);
-            console.log("3. Imported strings: ", importedStrings);
             top.localizedStrings = importedStrings;
             onLoadCallback && onLoadCallback();
         } catch(ex) {
@@ -469,7 +487,7 @@ function initializeLocalization(localizedStringsJsonUri, onLoadCallback) {
         }
     }
 
-    console.log("2. Fetching localizatoin: " + localizedStringsJsonUri);
+    console.log("Fetching localization: " + localizedStringsJsonUri);
     fetch(localizedStringsJsonUri)
         .then(res => res.blob())
         .then(blob => {
@@ -533,7 +551,6 @@ export function showEnvironment(indexToShow, offsetCameraDegrees) {
     }
 
     // Handle locked environment
-    console.log(indexToShow);
     let isLocked = top.environments[indexToShow].isLocked;
     if(isLocked && !top.isAuthorized) {
         top.toggleFullscreen(false); // Exit fullscreen. Necessary to display login form
@@ -593,9 +610,8 @@ export function showEnvironment(indexToShow, offsetCameraDegrees) {
     if(resetCameraOnNavigation)
         top.camera.resetToInitial();
 
-    if(offsetCameraDegrees) {
+    if(useDestinationCameraOffsetOnNavigation && offsetCameraDegrees)
         top.camera.setAlphaRotation(offsetCameraDegrees);
-    }
 
     top.onEnvironmentChanged();
 }

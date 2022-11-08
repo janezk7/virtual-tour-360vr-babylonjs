@@ -10,6 +10,7 @@ export function exportEnvironments(environments) {
         env.hotspots.forEach(m => 
             hotspots.push({
                 text: m.displayText,
+                isStepType: m.isStepType,
                 isLeft: m.isLeft,
                 pos: m.meshMarker.position,
                 dest: m.dest,
