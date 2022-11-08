@@ -69,3 +69,4 @@ dist/*
 dist/Resources/Videos/
 .cache/
 dist/Resources/Images/
+dist/Resources/Models/

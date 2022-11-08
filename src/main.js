@@ -17,9 +17,10 @@ const isDeployingToDnn = false;
 
 // App Settings
 const initialEnvironmentIndex = 0;
-const useInitialCameraAlpha = false;
-const initialCameraAlpha = 3.45;
-const resetCameraOnNavigation = false;
+const useDefaultCameraOrientation = true;
+const defaultCameraAlpha = -0.2;
+const defaultCameraBeta = 1.4;
+const resetCameraOnNavigation = true;
 const useDestinationCameraOffsetOnNavigation = false; // Takes priority over reset
 
 // Document setup
@@ -189,9 +190,9 @@ function createScene(engine, canvas) {
     //camera.pinchPrecision = 12; // Default
     camera.attachControl(canvas, true);
     camera.inputs.attached.mousewheel.detachControl(canvas);
-    camera.resetToInitial = () => {
-        top.camera.alpha = useInitialCameraAlpha ? initialCameraAlpha : (-Math.PI / 2);
-        top.camera.beta = Math.PI / 2;
+    camera.resetToDefault = () => {
+        top.camera.alpha = useDefaultCameraOrientation ? defaultCameraAlpha : (-Math.PI / 2);
+        top.camera.beta = useDefaultCameraOrientation ? defaultCameraBeta : (Math.PI / 2);
     }
     camera.setAlphaRotation = (degrees) => {
         let rad = degrees * (Math.PI/180);
@@ -374,11 +375,10 @@ function addScreenUI(advancedTexture) {
             let degrees_alpha = Math.round(rad_alpha * 180 / Math.PI) % 360;
             tbDegrees.text = `Alpha: ${degrees_alpha} degrees (${rad_alpha} radian)`;
 
-            /*
             let rad_beta = getRadianNormalized(top.camera.beta);
             let degrees_beta = Math.round(rad_beta * 180 / Math.PI) % 360;
             tbDegrees.text += `\nBeta: ${degrees_beta} degrees (${rad_beta} radian)`;
-            */
+            
         }, 100);
     }
 
@@ -521,7 +521,7 @@ export function setupSceneEnvironments(envDefinitions) {
 export function reinitializeLoadedEnvironmentDefinitions() {
     // Reset camera, so billboards face correctly
     let {alpha, beta} = top.camera;
-    top.camera.resetToInitial();
+    top.camera.resetToDefault();
 
     setupSceneEnvironments(top.loadedEnvironmentDefinitions);
 
@@ -608,7 +608,7 @@ export function showEnvironment(indexToShow, offsetCameraDegrees) {
 
     // Set camera orientation
     if(resetCameraOnNavigation)
-        top.camera.resetToInitial();
+        top.camera.resetToDefault();
 
     if(useDestinationCameraOffsetOnNavigation && offsetCameraDegrees)
         top.camera.setAlphaRotation(offsetCameraDegrees);
