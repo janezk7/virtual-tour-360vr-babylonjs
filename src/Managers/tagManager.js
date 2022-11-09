@@ -82,19 +82,22 @@ export function create3dTag(controlName, tagText, titleText, descriptionText, im
     // Create icon (simple)
     const imgGraphic = createIconGraphic(true, isLeft);
     mesh.addChild(imgGraphic)
-    imgGraphic.position = new BABYLON.Vector3((isLeft ? -1 : 1) *1,0.12,0);
+    imgGraphic.position = new BABYLON.Vector3((isLeft ? -1 : 1) *1.32,0.16,0);
+    imgGraphic.scaling.x = 0.15 * 2.516;
+    imgGraphic.scaling.y = 0.15; 
 
     // Create icon (full)
     const imgGraphicHover = createIconGraphic(true, isLeft, true);
     mesh.addChild(imgGraphicHover)
     imgGraphicHover.position = imgGraphic.position;
+    imgGraphicHover.scaling = imgGraphic.scaling;
     imgGraphicHover.visibility = 0;
 
     // Create text
     const textGraphic = createTextGraphic(tagText, controlName, isLeft, 125);
     mesh.addChild(textGraphic);
     textGraphic.visibility = 0; // Don't show text for tags. Bad visibility on mobile
-    textGraphic.position = new BABYLON.Vector3((isLeft ? -1 : 1) *1.7,-0.55,0);
+    textGraphic.position = new BABYLON.Vector3((isLeft ? -1 : 1) *1.93,-0.43,0);
 
     // Hover events (pc-only)
     meshBtnUI.onPointerEnterObservable.add((evData, eventState) => {
@@ -138,7 +141,7 @@ export function tagManagerCastRayHandler() {
     if(hit.pickedMesh) {
         // Reset camera, so billboard faces correctly
         const {alpha, beta} = top.camera;
-        top.camera.resetToInitial();
+        top.camera.resetToDefault();
 
         //console.log(hit.pickedMesh.name);
         let currentEnvironment = top.environments[top.currentEnvironmentIndex];

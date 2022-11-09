@@ -76,13 +76,16 @@ export function create3dHotspot(controlName, hotspotText, isLocked, destinationI
 
     // Create icon
     const imgGraphic = createIconGraphic(false, isLeft);
-    mesh.addChild(imgGraphic);
-    imgGraphic.position = new BABYLON.Vector3((isLeft ? -1 : 1) *1,0.12,0);
+    mesh.addChild(imgGraphic, true);
+    imgGraphic.position = new BABYLON.Vector3((isLeft ? -1 : 1) *1.32,0.16,0);
+    imgGraphic.scaling.x = 0.15 * 2.516;
+    imgGraphic.scaling.y = 0.15; 
+
 
     // Create text
     const textGraphic = createTextGraphic(hotspotText, controlName, isLeft);
     mesh.addChild(textGraphic);
-    textGraphic.position = new BABYLON.Vector3((isLeft ? -1 : 1) * 1.7,-0.55,0);
+    textGraphic.position = new BABYLON.Vector3((isLeft ? -1 : 1) * 1.93,-0.43,0);
 
     var meshLocked;
     if(isLocked) {
@@ -90,7 +93,7 @@ export function create3dHotspot(controlName, hotspotText, isLocked, destinationI
         meshLocked.material = top.materials.lockedMat;
         meshLocked.isPickable = false;
         mesh.addChild(meshLocked);
-        meshLocked.position = new BABYLON.Vector3((isLeft ? -1 : 1)*2.2, 0.8, 0);
+        meshLocked.position = new BABYLON.Vector3((isLeft ? -1 : 1)*2.9, 1, 0);
     }
     
     return {mesh: mesh,  uiElement: meshBtnUI};
@@ -103,7 +106,7 @@ export function hotspotManagerCastRayHandler() {
     if(hit.pickedMesh) {
         // Reset camera, so billboard faces correctly
         const {alpha, beta} = top.camera;
-        top.camera.resetToInitial();
+        top.camera.resetToDefault();
 
         let currentEnvironment = top.environments[top.currentEnvironmentIndex];
         let hotspotBaseName = getHotspotName(currentEnvironment.name, currentEnvironment.hotspots.length);

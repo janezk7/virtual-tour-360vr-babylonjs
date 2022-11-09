@@ -23,8 +23,8 @@
     "parcel-bundler": "^1.12.5"
   },
   "dependencies": {
-    "babylonjs": "^4.2.2",
-    "babylonjs-gui": "^4.2.2",
+    "babylonjs": "^5.31.2",
+    "babylonjs-gui": "^5.31.2",
     "core-js": "^3.24.1",
     "regenerator-runtime": "^0.13.9"
   }

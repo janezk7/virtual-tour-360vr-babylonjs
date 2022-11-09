@@ -50,8 +50,6 @@ export function createIconGraphic(isTag, isLeftPosition, isHover) {
     else if (!isTag && !isRightPosition)
         imgPlane.material = top.materials.hotspotMat2;
 
-    imgPlane.scaling.x *= 3.5 * 2.516;
-    imgPlane.scaling.y *= 3.5;
     imgPlane.isPickable = false;
 
     return imgPlane;
@@ -165,7 +163,8 @@ export function createContentPanelFullScreen(scene, localizedStrings) {
     btnClose.addControl(tbCloseText);
     tbCloseText.color = "black";
     tbCloseText.fontSizeInPixels = 20;
-    tbCloseText.paddingBottom = 2;
+    tbCloseText.paddingLeftInPixels = 2;
+    tbCloseText.paddingBottomInPixels = 2;
 
     // Info.Image
     var imageRect = new GUI.Rectangle("imageRect");
