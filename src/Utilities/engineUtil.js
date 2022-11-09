@@ -3,16 +3,16 @@ import * as GUI from 'babylonjs-gui';
 
 export function showAxis(scene, size) {
     var makeTextPlane = function(text, color, size) {
-    var dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", 50, scene, true);
-    dynamicTexture.hasAlpha = true;
-    dynamicTexture.drawText(text, 5, 40, "bold 36px Arial", color , "transparent", true);
-    var plane = new BABYLON.Mesh.CreatePlane("TextPlane", size, scene, true);
-    plane.material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
-    plane.material.backFaceCulling = false;
-    plane.material.specularColor = new BABYLON.Color3(0, 0, 0);
-    plane.material.diffuseTexture = dynamicTexture;
-    return plane;
-     };
+        var dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", 50, scene, true);
+        dynamicTexture.hasAlpha = true;
+        dynamicTexture.drawText(text, 5, 40, "bold 36px Arial", color , "transparent", true);
+        var plane = new BABYLON.Mesh.CreatePlane("TextPlane", size, scene, true);
+        plane.material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
+        plane.material.backFaceCulling = false;
+        plane.material.specularColor = new BABYLON.Color3(0, 0, 0);
+        plane.material.diffuseTexture = dynamicTexture;
+        return plane;
+    };
   
     var axisX = BABYLON.Mesh.CreateLines("axisX", [ 
       new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0), new BABYLON.Vector3(size * 0.95, 0.05 * size, 0), 
@@ -35,6 +35,19 @@ export function showAxis(scene, size) {
     axisZ.color = new BABYLON.Color3(0, 0, 1);
     var zChar = makeTextPlane("Z", "blue", size / 10);
     zChar.position = new BABYLON.Vector3(0, 0.05 * size, 0.9 * size);
+
+    var axisSphere = BABYLON.CreateSphere("AxisSphere", {}, scene);
+    axisSphere.visibility = 0.0;
+    axisSphere.addChild(xChar);
+    axisSphere.addChild(yChar);
+    axisSphere.addChild(zChar);
+    axisSphere.addChild(axisX);
+    axisSphere.addChild(axisY);
+    axisSphere.addChild(axisZ);
+
+    axisSphere.scalingDeterminant = 0.5;
+
+    return axisSphere;
 };
 
 export function createIconGraphic(isTag, isLeftPosition, isHover) {

@@ -5,10 +5,11 @@ import { getEnvironments } from './Managers/environmentManager';
 import { tagManagerCastRayHandler } from './Managers/tagManager';
 import { hotspotManagerCastRayHandler } from './Managers/hotspotManager';
 import { localizeAppTexts } from './Managers/localizationManager';
-import { createContentPanelFullScreen } from './Utilities/engineUtil';
+import { createContentPanelFullScreen, showAxis } from './Utilities/engineUtil';
 import { initializeDOM, setCanvasSize } from './domSetup';
 import "core-js/stable";
 import "regenerator-runtime/runtime";
+import 'babylonjs-loaders';
 
 // Deployment
 const isProduction = false; // For loading definitions
@@ -38,6 +39,7 @@ const environmentToShow_debug = 3;
 const showInfoPanelOnStart_debug = isDebug && false;
 const showInspector_debug = isDebug && true;
 const showCameraAlphaIndicator_debug = isDebug && true;
+const showAxis_debug = isDebug && true;
 if(isDebug) {
     document.body.style.overflow = 'unset';
 }
@@ -59,6 +61,7 @@ top.photoDome = null;
 top.videoDome = null;
 top.camera = null;
 top.advancedTexture = null;
+top.axis = null;
 // Custom BabylonJS objects
 top.infoPanel = {holder: null, tbTitle: null, tbDesc: null, tbImage: null, btnLink: null};
 top.materials = {};
@@ -114,6 +117,20 @@ initializeAppSettings(appSettingsJsonUri, () => {
                 showInfoPanelOnStart_debug && top.infoPanel.holder.show();
             }
         });
+
+        // Test load 3d model
+        BABYLON.SceneLoader.ImportMesh(
+            null, 
+            "./Resources/Models/MyModel/", 
+            "model.gltf", 
+            top.scene, 
+            function (meshes, particleSystems, skeletons) {
+                let loadedModel = meshes[0];
+                loadedModel.name = "_ImportedModel";
+                loadedModel.position.x = 2;
+                // do something with the meshes and skeletons
+                // particleSystems are always null for glTF assets
+            });
     });
 });
 
@@ -144,7 +161,12 @@ function setupScene(engine, canvas) {
     });
     
     // Show axis
-    //showAxis(scene, 8);
+    if(showAxis_debug) {
+        top.axis = showAxis(scene, 5);
+        top.axis.position.x = -6.62;
+        top.axis.position.y = -3.12;
+        top.axis.position.z = 1.25;
+    }
     
     // Create light
     var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);

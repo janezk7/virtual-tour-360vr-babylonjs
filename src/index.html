@@ -10,8 +10,32 @@
   -->
     <link rel="stylesheet" href="style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!--
+  <script src="https://preview.babylonjs.com/babylon.js"></script> 
+    <script src="https://preview.babylonjs.com/gltf_validator.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+  -->
 </head>
 <body>
+  <div id="editInterface">
+    <div id="editInterfaceTitle">3d Model: <span id="selected3dModel">Tree</span></div>
+    <label for="rangeSize" class="form-label">Size</label>
+    <input type="range" class="form-range" id="rangeSize">
+    <label for="rangeSize" class="form-label">Position X</label>
+    <input type="range" class="form-range" id="rangeSize">
+    <label for="rangeSize" class="form-label">Position Y</label>
+    <input type="range" class="form-range" id="rangeSize">
+    <label for="rangeSize" class="form-label">Position Z</label>
+    <input type="range" class="form-range" id="rangeSize">
+    <label for="rangeSize" class="form-label">Rotation X</label>
+    <input type="range" class="form-range" id="rangeSize">
+    <label for="rangeSize" class="form-label">Rotation Y</label>
+    <input type="range" class="form-range" id="rangeSize">
+    <label for="rangeSize" class="form-label">Rotation Z</label>
+    <input type="range" class="form-range" id="rangeSize">
+    <button type="button" class="btn btn-primary col" id="btnPlace3dModel">Apply Changes</button>
+  </div>
   <div style="text-align: center;">
     <div id="app">
       <div id="canvasOverlay">
@@ -67,6 +91,9 @@
               </li>
               <li class="nav-item" role="presentation">
                 <button class="nav-link" id="tagging-tab" data-bs-toggle="tab" data-bs-target="#tagging" type="button" role="tab" aria-controls="tagging" aria-selected="false">New info tag</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="model3d-tab" data-bs-toggle="tab" data-bs-target="#model3d" type="button" role="tab" aria-controls="model3d" aria-selected="false">New 3d model</button>
               </li>
               <li class="nav-item" role="presentation">
                 <button class="nav-link" id="registerenvironment-tab" data-bs-toggle="tab" data-bs-target="#registerenvironment" type="button" role="tab" aria-controls="registerenvironment" aria-selected="false">Register Environment</button>
@@ -131,6 +158,26 @@
                   <button style="width: 100%;" type="button" class="btn btn-primary col" id="btnToggleHotspotRight" >Place hotspot (Right)</button>
                 </div>
               </div>
+              <div class="tab-pane " id="model3d" role="tabpanel" aria-labelledby="model3d-tab">
+                <div class="row mb-3">
+                  <h2>3d Model</h2>
+                  <label for="rangeSize" class="form-label">Size</label>
+                  <input type="range" class="form-range" id="rangeSize">
+                  <label for="rangeSize" class="form-label">Position X</label>
+                  <input type="range" class="form-range" id="rangeSize">
+                  <label for="rangeSize" class="form-label">Position Y</label>
+                  <input type="range" class="form-range" id="rangeSize">
+                  <label for="rangeSize" class="form-label">Position Z</label>
+                  <input type="range" class="form-range" id="rangeSize">
+                  <label for="rangeSize" class="form-label">Rotation X</label>
+                  <input type="range" class="form-range" id="rangeSize">
+                  <label for="rangeSize" class="form-label">Rotation Y</label>
+                  <input type="range" class="form-range" id="rangeSize">
+                  <label for="rangeSize" class="form-label">Rotation Z</label>
+                  <input type="range" class="form-range" id="rangeSize">
+                  <button type="button" class="btn btn-primary col" id="btnPlace3dModel" >Place model</button>
+                </div>
+              </div>
               <div class="tab-pane " id="registerenvironment" role="tabpanel" aria-labelledby="registerenvironment-tab">
                 <div class="row mb-3">
                   <h2>New environment</h2>
@@ -189,7 +236,7 @@
   <input type="hidden" id="serverAppDirectory" value="/Portals/0/VirtualTour360/"></input>
   <!-- Remove custom scripts references when deploying to DNN. Add references manually in DNN's HTML module footer 
   -->
-    <script src="main.js"></script>
+  <script src="main.js"></script>
 
   <!-- Other scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>  

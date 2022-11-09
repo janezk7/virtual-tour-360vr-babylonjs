@@ -25,6 +25,7 @@
   "dependencies": {
     "babylonjs": "^5.31.2",
     "babylonjs-gui": "^5.31.2",
+    "babylonjs-loaders": "^5.31.2",
     "core-js": "^3.24.1",
     "regenerator-runtime": "^0.13.9"
   }
