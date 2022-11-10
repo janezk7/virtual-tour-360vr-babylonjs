@@ -193,12 +193,6 @@ function setupScene(engine, canvas) {
 // CreateScene function that creates and return the scene
 function createScene(engine, canvas) {
     let scene = new BABYLON.Scene(engine);
-    scene.createDefaultEnvironment({
-        enableGroundShadow: false,
-        createGround: false,
-        createSkybox: false
-    });
-
     top.scene = scene;
 
     var hdrTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("Textures/studio.env", scene);
