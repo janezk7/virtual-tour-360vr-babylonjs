@@ -18,6 +18,8 @@ const showDevelopmentTools = true;
 const isDeployingToDnn = false;
 
 // App Settings
+const onlyUseIBL = true;
+const intensityIBL = 2;
 const initialEnvironmentIndex = 0;
 const useDefaultCameraOrientation = true;
 const defaultCameraAlpha = -0.2;
@@ -160,7 +162,8 @@ function setupScene(engine, canvas) {
     // Create light
     var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
     light.intensity = 0.7;
-    
+    light.setEnabled(!onlyUseIBL);
+
     // Register scene handlers
     scene.onPointerDown = () => {
         if(top.tagManager.isPlacingMode) {
@@ -200,6 +203,7 @@ function createScene(engine, canvas) {
 
     var hdrTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("Textures/studio.env", scene);
     scene.environmentTexture = hdrTexture;
+    scene.environmentIntensity = intensityIBL;
 
     scene.clearColor = new BABYLON.Color3(0, 82 / 255, 131 / 255);
 
