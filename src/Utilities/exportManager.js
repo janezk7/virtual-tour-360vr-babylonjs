@@ -37,7 +37,8 @@ export function exportEnvironments(environments) {
             isLocked: env.isLocked,
             uri: env.uri, // !env.isLocked && env.uri
             hotspots: hotspots,
-            tags: tags
+            tags: tags,
+            models: env.models
         }
 
         environmentDefinitions.push(definition);

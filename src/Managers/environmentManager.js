@@ -37,6 +37,7 @@ var createEnvironment = function (environmentDefinition) {
         uri: environmentDefinition.uri,
         hotspots: [],
         tags: [],
+        models: [],
         dispose: function () { disposeEnvironment(this) }
     };
 }
@@ -133,6 +134,7 @@ function getEnvironments(definitions) {
         let envIndex = envIndexDict[envDef.name];
         environments[envIndex].hotspots = getHotspots(envDef, environments);
         environments[envIndex].tags = getTags(envDef);
+        environments[envIndex].models = envDef.models; // We load and display models on the fly
     });
     
     // Define helper functions

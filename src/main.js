@@ -10,6 +10,7 @@ import { initializeDOM, setCanvasSize } from './domSetup';
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 import 'babylonjs-loaders';
+import { loadModel } from './Managers/modelManager';
 
 // Deployment
 const isProduction = false; // For loading definitions
@@ -39,7 +40,8 @@ const environmentToShow_debug = 3;
 const showInfoPanelOnStart_debug = isDebug && false;
 const showInspector_debug = isDebug && true;
 const showCameraAlphaIndicator_debug = isDebug && true;
-const showAxis_debug = isDebug && true;
+const showAxis_debug = isDebug && false;
+const flycamera_debug = isDebug && false;
 if(isDebug) {
     document.body.style.overflow = 'unset';
 }
@@ -86,6 +88,7 @@ top.isFullscreen = false;
 top.importedEnvironmentsJson = null;
 top.hotspotManager = { isPlacingMode: false, isLeft: false, hotspots: [] };
 top.tagManager = { isPlacingMode: false, isLeft: false, tags: [] };
+top.loadedEnvironmentModels = [];
 
 // Custom gui blocking solution (3d elements check this to handle pointer events)
 top.isBlocking3dElements = false;
@@ -117,20 +120,6 @@ initializeAppSettings(appSettingsJsonUri, () => {
                 showInfoPanelOnStart_debug && top.infoPanel.holder.show();
             }
         });
-
-        // Test load 3d model
-        BABYLON.SceneLoader.ImportMesh(
-            null, 
-            "./Resources/Models/MyModel/", 
-            "model.gltf", 
-            top.scene, 
-            function (meshes, particleSystems, skeletons) {
-                let loadedModel = meshes[0];
-                loadedModel.name = "_ImportedModel";
-                loadedModel.position.x = 2;
-                // do something with the meshes and skeletons
-                // particleSystems are always null for glTF assets
-            });
     });
 });
 
@@ -201,8 +190,19 @@ function setupScene(engine, canvas) {
 // CreateScene function that creates and return the scene
 function createScene(engine, canvas) {
     let scene = new BABYLON.Scene(engine);
+    scene.createDefaultEnvironment({
+        enableGroundShadow: false,
+        createGround: false,
+        createSkybox: false
+    });
+
     top.scene = scene;
-    scene.clearColor = new BABYLON.Color3(0, 82 / 255, 131 / 255); // TGK blue: 0, 121, 193
+
+    var hdrTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("Textures/studio.env", scene);
+    scene.environmentTexture = hdrTexture;
+
+    scene.clearColor = new BABYLON.Color3(0, 82 / 255, 131 / 255);
+
     let camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2,  Math.PI / 2, 0, BABYLON.Vector3.Zero(), scene);
     top.camera = camera;
     camera.panningSensibility = 0;
@@ -220,6 +220,15 @@ function createScene(engine, canvas) {
         let rad = degrees * (Math.PI/180);
         console.log("setting to "+ rad + " radians");
         top.camera.alpha = rad;
+    }
+
+    if(flycamera_debug) {
+        camera.inertia = 0;
+        camera.panningSensibility = 1000;
+        camera.angularSensibilityY = 500;
+        camera.angularSensibilityX = 500;
+        camera.inputs.attached.mousewheel.attachControl(canvas);
+        camera.wheelPrecision = 10;
     }
     
     // Load textures and materials
@@ -601,6 +610,9 @@ export function showEnvironment(indexToShow, offsetCameraDegrees) {
     });
     top.environments[top.currentEnvironmentIndex].tags.forEach(t => t.guiElement.isVisible = false);
 
+    // Dispose loaded models
+    top.loadedEnvironmentModels.forEach(m => m.dispose());
+
     // Dispose of current video/photo texture
     let isCurrentVideo = top.environments[top.currentEnvironmentIndex].isVideo; 
     if(isCurrentVideo) 
@@ -620,6 +632,24 @@ export function showEnvironment(indexToShow, offsetCameraDegrees) {
     }
 
     top.toggleVideoDome(environmentToShow.isVideo);
+
+    // Load models
+    top.environments[indexToShow].models?.forEach(m => {
+        loadModel(
+            "_3dModel_"+ m.name, 
+            m.url, 
+            (loadedModel) => {
+                console.log("Successfully loaded "+ m.name);
+                top.loadedEnvironmentModels.push(loadedModel);
+                loadedModel.position = new BABYLON.Vector3(m.pos.x, m.pos.y, m.pos.z);
+                loadedModel.rotation = new BABYLON.Vector3(m.rot.x, m.rot.y, m.rot.z);
+                loadedModel.scaling = new BABYLON.Vector3(m.scale.x, m.scale.y, m.scale.z);
+            },
+            (error) => {
+                console.log(`Failed loading model: ${m.url}. Error: `, error);
+            }
+        );
+    })
 
     // Show new hotspots and tags
     top.environments[indexToShow].hotspots.forEach(m => {
