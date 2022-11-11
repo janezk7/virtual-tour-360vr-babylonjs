@@ -25,7 +25,7 @@ const initialEnvironmentIndex = 0;
 const useDefaultCameraOrientation = true;
 const defaultCameraAlpha = -0.2;
 const defaultCameraBeta = 1.4;
-const resetCameraOnNavigation = true;
+const resetCameraOnNavigation = false; // Recommended when 360 media is not orientation normalized or camera offsets are not set for hotspots.
 const useDestinationCameraOffsetOnNavigation = false; // Takes priority over reset
 
 // Document setup
@@ -179,7 +179,12 @@ function setupScene(engine, canvas) {
 
     if(showDevelopmentTools) {
         document.getElementById('btnInspector').onclick = () => { 
-            scene.debugLayer.isVisible() ? scene.debugLayer.hide() : scene.debugLayer.show();
+            scene.debugLayer.isVisible() 
+                ? scene.debugLayer.hide() : 
+                scene.debugLayer.show({
+                    embedMode: false,
+                    overlay: true
+                });
         };
         document.getElementById('btnUtilityInspector').onclick = () => {
             let debugLayer = top.gui3d.utilityLayer.utilityLayerScene.debugLayer; 
@@ -220,6 +225,9 @@ function createScene(engine, canvas) {
         console.log("setting to "+ rad + " radians");
         top.camera.alpha = rad;
     }
+
+    if(useDefaultCameraOrientation)
+        camera.resetToDefault();
 
     if(flycamera_debug) {
         camera.inertia = 0;
@@ -279,7 +287,7 @@ function createScene(engine, canvas) {
     addScreenUI(advancedTexture);
 
     // Initialize XR experience (disabled for now)
-    //let xrExperience = await scene.createDefaultXRExperienceAsync();
+    scene.createDefaultXRExperienceAsync();
 
     return scene;
 };
