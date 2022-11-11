@@ -24,4 +24,9 @@ function quitFullscreen() {
     }
 }
 
-export {launchFullscreen, quitFullscreen}
+function degrees_to_radians(degrees) {
+    var pi = Math.PI;
+    return degrees * (pi/180);
+}
+
+export {launchFullscreen, quitFullscreen, degrees_to_radians}

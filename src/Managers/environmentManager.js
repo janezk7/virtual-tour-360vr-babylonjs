@@ -64,6 +64,7 @@ function getHotspots(environmentDefinition, allEnvironments) {
             
             hotspots.push({
                 displayText: marker.text,
+                isStepType: marker.isStepType,
                 isLeft: marker.isLeft,
                 dest: marker.dest,
                 cameraOffsetDegrees: marker.cameraOffsetDegrees,

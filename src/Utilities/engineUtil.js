@@ -68,6 +68,13 @@ export function createIconGraphic(isTag, isLeftPosition, isHover) {
     return imgPlane;
 }
 
+export function createStepIconGraphic() {
+    const imgPlane = BABYLON.MeshBuilder.CreatePlane("stepIcon", {width: 10, height: 10});
+    imgPlane.material = top.materials.hotspotMatStep;
+    imgPlane.isPickable = false;
+    return imgPlane;
+}
+
 export function createTextGraphic(text, controlIdentifier, isLeftPosition, fontSize) {
     const planeOptions = {width: 65, height: 65};
     const textPlane = BABYLON.MeshBuilder.CreatePlane("textBlockPlane", planeOptions);

@@ -2,7 +2,8 @@
 import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
 import { getHotspotName } from '../Constants/nameConstants';
-import { createIconGraphic, createTextGraphic } from '../Utilities/engineUtil';
+import { createIconGraphic, createStepIconGraphic, createTextGraphic } from '../Utilities/engineUtil';
+import { degrees_to_radians } from '../Utilities/jsUtil';
 
 export function toggleHotspotPlacingMode(isLeft) {
     top.hotspotManager.isPlacingMode = !top.hotspotManager.isPlacingMode;
@@ -30,6 +31,10 @@ export function create3dHotspot(controlName, hotspotText, isLocked, destinationI
     mesh.scaling = new BABYLON.Vector3(30,30,30);
     mesh.visibility = 0;
     mesh.billboardMode = BABYLON.TransformNode.BILLBOARDMODE_Y + BABYLON.TransformNode.BILLBOARDMODE_X;
+
+    // Only billboard on Y for step type
+    if(isStepType)
+        mesh.billboardMode = BABYLON.TransformNode.BILLBOARDMODE_Y;
     
     let meshBtnUI = new GUI.MeshButton3D(mesh, "meshbtn_" + controlName);
     meshBtnUI.destinationNavigationData = {destinationIndex, cameraOffsetDegrees};
@@ -72,8 +77,16 @@ export function create3dHotspot(controlName, hotspotText, isLocked, destinationI
         upAnimation();
     }
 
-    // TODO: Handle step type hotspots
+    // Add graphics to mesh
+    if(isStepType) 
+        addStepHotspotGraphicToMesh(mesh, controlName, hotspotText, isLeft, isLocked);
+    else 
+        addHotspotGraphicToMesh(mesh, controlName, hotspotText, isLeft, isLocked);
+    
+    return {mesh: mesh,  uiElement: meshBtnUI};
+}
 
+function addHotspotGraphicToMesh(mesh, identifier, text, isLeft, isLocked) {
     // Create icon
     const imgGraphic = createIconGraphic(false, isLeft);
     mesh.addChild(imgGraphic, true);
@@ -81,9 +94,8 @@ export function create3dHotspot(controlName, hotspotText, isLocked, destinationI
     imgGraphic.scaling.x = 0.15 * 2.516;
     imgGraphic.scaling.y = 0.15; 
 
-
     // Create text
-    const textGraphic = createTextGraphic(hotspotText, controlName, isLeft);
+    const textGraphic = createTextGraphic(text, identifier, isLeft);
     mesh.addChild(textGraphic);
     textGraphic.position = new BABYLON.Vector3((isLeft ? -1 : 1) * 1.93,-0.43,0);
 
@@ -95,8 +107,28 @@ export function create3dHotspot(controlName, hotspotText, isLocked, destinationI
         mesh.addChild(meshLocked);
         meshLocked.position = new BABYLON.Vector3((isLeft ? -1 : 1)*2.9, 1, 0);
     }
-    
-    return {mesh: mesh,  uiElement: meshBtnUI};
+}
+
+function addStepHotspotGraphicToMesh(mesh, identifier, text, isLeft, isLocked) {
+    const imgGraphic = createStepIconGraphic();
+    mesh.addChild(imgGraphic, true);
+    imgGraphic.scalingDeterminant = 3;
+    imgGraphic.rotation = new BABYLON.Vector3(degrees_to_radians(60), 0, 0);
+
+    // Create text
+    const textGraphic = createTextGraphic(text, identifier, isLeft);
+    mesh.addChild(textGraphic);
+    textGraphic.position = new BABYLON.Vector3((isLeft ? -1 : 1) * 1.93,-0.43,0);
+    textGraphic.rotation = new BABYLON.Vector3(degrees_to_radians(15), 0, 0);
+
+    var meshLocked;
+    if(isLocked) {
+        meshLocked = BABYLON.MeshBuilder.CreatePlane("lockedIcon", {width: 10, height: 10});
+        meshLocked.material = top.materials.lockedMat;
+        meshLocked.isPickable = false;
+        mesh.addChild(meshLocked);
+        meshLocked.position = new BABYLON.Vector3(1.5, 1, 0);
+    }
 }
 
 export function hotspotManagerCastRayHandler() {
