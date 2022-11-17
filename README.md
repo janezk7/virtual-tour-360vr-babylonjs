@@ -47,6 +47,21 @@ Virtual tour, 360 videos, BabylonJs, Web, VR
 **App display issues or environments not showing correctly**
 - Solution: Refresh site with Ctrl+F5 after deploying new files or updating JSON. Prevents loading old files from cache.
 
+**DNN: 404 Not found when loading 3d model extensions or other files**
+- Check server webconfig to allow mimetypes for your model extensions (e.g.: ``.gltf``, ``.glb``) and other babylonjs file extensions (e.g.: ``.env``)
+
+```xml
+<system.webServer>
+    <staticContent>
+      <clientCache cacheControlCustom="public" cacheControlMode="UseMaxAge" cacheControlMaxAge="365.00:00:00" />
+      <remove fileExtension=".glb" />
+      <mimeMap fileExtension=".glb" mimeType="model/gltf-binary" />
+      <remove fileExtension=".env" />
+      <mimeMap fileExtension=".env" mimeType="application/x-envoy" />
+    </staticContent>
+  ...
+```
+
 **App doesn't display correctly**
 - App css styles, bootstrap or other styling library might clash with the default DNN theme and styles (including bootstrap)
 - Remove or minimize your styling css references
