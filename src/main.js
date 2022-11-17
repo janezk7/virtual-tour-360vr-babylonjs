@@ -477,6 +477,7 @@ export function setupSceneEnvironments(envDefinitions) {
     top.photoDome.texture.dispose();
     top.videoDome.texture.dispose();
     // Dispose of environment elements 
+    top.loadedEnvironmentModels?.forEach(m => m.dispose());
     for(let i = 0; i < top.environments.length; i++) {
         top.environments[i].dispose();
     }
@@ -488,6 +489,8 @@ export function setupSceneEnvironments(envDefinitions) {
     top.environments = getEnvironments(envDefinitions);
     top.loadedEnvironmentDefinitions = envDefinitions;
 
+    top.currentEnvironmentIndex = 0;
+
     populateDestinationSelect();
     populateDestinationList();
 }
@@ -496,6 +499,10 @@ export function reinitializeLoadedEnvironmentDefinitions() {
     // Reset camera, so billboards face correctly
     let {alpha, beta} = top.camera;
     top.camera.resetToDefault();
+
+    // TODO Dispose everything
+    // Dispose loaded models
+    top.loadedEnvironmentModels.forEach(m => m.dispose());
 
     setupSceneEnvironments(top.loadedEnvironmentDefinitions);
 
@@ -547,11 +554,11 @@ export function showEnvironment(indexToShow, offsetCameraDegrees) {
 
     // Cleanup current environment
     // Hide current hotspots and tags
-    top.environments[top.currentEnvironmentIndex].hotspots.forEach(m => {
+    top.environments[top.currentEnvironmentIndex].hotspots?.forEach(m => {
         m.guiElement.isVisible = false;
         m.meshMarker.setEnabled(false);
     });
-    top.environments[top.currentEnvironmentIndex].tags.forEach(t => t.guiElement.isVisible = false);
+    top.environments[top.currentEnvironmentIndex].tags?.forEach(t => t.guiElement.isVisible = false);
 
     // Dispose loaded models
     top.loadedEnvironmentModels.forEach(m => m.dispose());
