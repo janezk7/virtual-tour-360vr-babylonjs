@@ -5,7 +5,7 @@ import { getEnvironments } from './Managers/environmentManager';
 import { tagManagerCastRayHandler } from './Managers/tagManager';
 import { hotspotManagerCastRayHandler } from './Managers/hotspotManager';
 import { localizeAppTexts } from './Managers/localizationManager';
-import { createContentPanel, createContentPanelVR, showAxis } from './Utilities/engineUtil';
+import { createContentPanel, createContentPanelVR, createVrCursor, showAxis } from './Utilities/engineUtil';
 import { initializeDOM, setCanvasSize } from './domSetup';
 import "core-js/stable";
 import "regenerator-runtime/runtime";
@@ -27,6 +27,8 @@ const defaultCameraAlpha = -0.2;
 const defaultCameraBeta = 1.4;
 const resetCameraOnNavigation = false; // Recommended when 360 media is not orientation normalized or camera offsets are not set for hotspots.
 const useDestinationCameraOffsetOnNavigation = false; // Takes priority over reset
+const enableImmersiveVR = true; // Experiemental (Cardboard cursor is not ideal, custom cursor is fix distance and only possible to select with gaze)
+const useCustomVrCursor = false; // Experimental. Fixed distance from camera (not ideal)
 
 // Document setup
 if(isDeployingToDnn) {
@@ -71,6 +73,7 @@ top.axis = null;
 // Custom BabylonJS objects
 top.infoPanel = {holder: null, tbTitle: null, tbDesc: null, image: null, btnLink: null};
 top.infoPanelVR = {holder: null, tbTitle: null, tbDesc: null, image: null, btnLink: null};
+top.vrCursor = null;
 top.materials = {};
 // Methods
 top.setPointer = (isShown) => document.body.style.cursor = isShown ? 'pointer' : '';
@@ -294,14 +297,35 @@ function createScene(engine, canvas) {
     addScreenUI(advancedTexture);
 
     // Initialize XR experience
-    scene.createDefaultXRExperienceAsync().then(xrExp => {
+    enableImmersiveVR && scene.createDefaultXRExperienceAsync().then(xrExp => {
+        let createCursor = () => {
+            top.vrCursor = createVrCursor();
+            top.vrCursor.position = top.camera.position;
+            scene.registerBeforeRender(() => {
+                if(!top.xrExperience?.baseExperience?.sessionManager?.inXRSession)
+                    return;
+                let vrRot = top.xrExperience.baseExperience.camera.absoluteRotation.toEulerAngles();
+                top.vrCursor.rotation.y = vrRot.y;
+                top.vrCursor.rotation.x = vrRot.x;
+            });
+        }
+
+        createVrCursorOnStart_debug && createCursor();
         xrExp.baseExperience.sessionManager.onXRSessionInit.add(() => {
             console.log("XR Session starting");
             top.infoPanel.holder.hide(); // Hide 2d panel if opened
+
+            // Create VR cursor
+            if(useCustomVrCursor && !top.vrCursor) {
+                createCursor();
+            }
+
+            top.vrCursor?.setEnabled(true);
         });
         xrExp.baseExperience.sessionManager.onXRSessionEnded.add(() => {
             console.log("XR Session ending");
             top.infoPanelVR.holder.hide(); // Hide 3d panel if opened
+            top.vrCursor.setEnabled(false);
 
             // BUGFIX: Fixes bug when unable to interact with 3d elements when exiting immersive experience
             top.isBlocking3dElements = false; 
@@ -414,8 +438,10 @@ export function initializeInfoPanel(localizedStrings) {
     // VR info panel
     let infoPanelVR = createContentPanelVR(scene, localizedStrings);
     infoPanelVR.infoPlaneHolder.position = top.camera.position;
+    /*
+    // Registers method to update info panel transform to VR camera
     top.scene.registerBeforeRender(() => {
-        // Update info panel to vr camera. (Not perfect)
+        // Update info panel to vr camera.
         if(top.xrExperience?.baseExperience?.sessionManager?.inXRSession) {
             let vrRot = top.xrExperience?.baseExperience.camera.absoluteRotation.toEulerAngles();
             infoPanelVR.infoPlaneHolder.rotation.y = vrRot.y;
@@ -426,6 +452,7 @@ export function initializeInfoPanel(localizedStrings) {
         //infoPanelVR.infoPlaneHolder.rotation.y = -1 * top.camera.alpha + 1.5708;
         //infoPanelVR.infoPlaneHolder.rotation.x = top.camera.beta + 1.5708;
     });
+    */
     top.infoPanelVR = {
         holder: infoPanelVR.infoPlaneHolder, 
         tbTitle: infoPanelVR.tbTitle, 
@@ -579,6 +606,12 @@ export function showInfoPanel(title, description, imageUrl, linkUrl) {
         panel3d.image.source = imageUrl;
         panel3d.btnLink.url = linkUrl;
         panel3d.btnLink.isVisible = linkUrl;
+
+        // Refresh orientation toward camera
+        let vrRot = top.xrExperience?.baseExperience.camera.absoluteRotation.toEulerAngles();
+        panel3d.holder.rotation.y = vrRot.y;
+        panel3d.holder.rotation.x = vrRot.x;
+
         panel3d.holder.show();
     } else {
         var panel2d = top.infoPanel;

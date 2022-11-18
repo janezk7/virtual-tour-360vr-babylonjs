@@ -433,7 +433,7 @@ export function createContentPanelVR(scene, localizedStrings) {
 
     // Constants
     const panelOptions = {width: 140, height: 140};
-    const panelPosition = new BABYLON.Vector3(0,0,190);
+    const panelPosition = new BABYLON.Vector3(0,0,250);
 
     // Info panel
     const infoPlane = BABYLON.MeshBuilder.CreatePlane("infoPlanePlaceholder", panelOptions);
@@ -636,7 +636,33 @@ export function createContentPanelVR(scene, localizedStrings) {
         infoPlaneHolder.setEnabled(true);
         top.isInfoPanelOpen = true; // Used for blocking UI elements on mobile
     }
+
+    infoPlaneHolder.hide();
+
     return {infoPlaneHolder, tbTitle, tbDesc, image, btnLink};
+}
+
+// Cursor for VR devices. Recommended for vr without controllers (CardboardVR gaze) 
+export function createVrCursor() {
+    var vrCursorHolder = BABYLON.MeshBuilder.CreateSphere("_vrCursorSphere", { segments: 16, diameter: 2}, top.scene);
+    vrCursorHolder.isPickable = false;
+    var cursorPlane = BABYLON.MeshBuilder.CreatePlane("vrCursorPlane", {width: 1, height: 1});
+    vrCursorHolder.addChild(cursorPlane);
+    cursorPlane.position = new BABYLON.Vector3(0,0,150);
+    cursorPlane.isPickable = false;
+
+    const adVrCursor = GUI.AdvancedDynamicTexture.CreateForMesh(cursorPlane);
+    adVrCursor.name = "_at_cursorVr";
+
+    var cursorEllipse = new GUI.Ellipse("cursorEllipse");
+    adVrCursor.addControl(cursorEllipse);
+    cursorEllipse.width = 0.99;
+    cursorEllipse.height = 0.99;
+    cursorEllipse.background = top.appSettings.primaryColor;
+    cursorEllipse.color = "transparent";
+    cursorEllipse.thickness = 0;
+
+    return vrCursorHolder;
 }
  
 // TODO: Unfinished and broken. Meant to unify duplicating code in tag/hotspot generation 
