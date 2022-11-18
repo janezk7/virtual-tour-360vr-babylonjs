@@ -201,7 +201,7 @@ function setupScene(engine, canvas) {
             debugLayer.isVisible() ? debugLayer.hide() : debugLayer.show();
         }
         document.getElementById('btn_ShowVr').onclick = () => { 
-            var experience = scene.createDefaultXRExperienceAsync();
+            initializeXrExperience();
         };
     }
 }
@@ -297,7 +297,13 @@ function createScene(engine, canvas) {
     addScreenUI(advancedTexture);
 
     // Initialize XR experience
-    enableImmersiveVR && scene.createDefaultXRExperienceAsync().then(xrExp => {
+    enableImmersiveVR && initializeXrExperience();
+
+    return scene;
+};
+
+function initializeXrExperience() {
+    scene.createDefaultXRExperienceAsync().then(xrExp => {
         let createCursor = () => {
             top.vrCursor = createVrCursor();
             top.vrCursor.position = top.camera.position;
@@ -332,9 +338,7 @@ function createScene(engine, canvas) {
         });
         top.xrExperience = xrExp;
     });
-
-    return scene;
-};
+}
 
 function addScreenUI(advancedTexture) {
     // Logo
