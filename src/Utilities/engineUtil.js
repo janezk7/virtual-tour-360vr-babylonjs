@@ -98,7 +98,8 @@ export function createTextGraphic(text, controlIdentifier, isLeftPosition, fontS
     return textPlane;
 }
 
-export function createContentPanelFullScreen(scene, localizedStrings) {
+// Create 2d content panel (FullscreenUI)
+export function createContentPanel(scene, localizedStrings) {
     // Info panel GUI texture
     const adinfoPanel = GUI.AdvancedDynamicTexture.CreateFullscreenUI("_at_infoPanel");//, true, scene, BABYLON.Texture.BILINEAR_SAMPLINGMODE);
 
@@ -426,21 +427,12 @@ export function createContentPanelFullScreen(scene, localizedStrings) {
     return {adinfoPanel, tbTitle, tbDesc, image, btnLink};
 }
 
-export function createContentPanel(scene, localizedStrings) {
+// Create 3d content panel (Recommended for VR)
+export function createContentPanelVR(scene, localizedStrings) {
     var infoPlaneHolder = BABYLON.Mesh.CreateSphere("infoPlaneHolder", 16, 2, scene);
-    infoPlaneHolder.setEnabled(false);
 
     // Constants
-    /*
-    var aspectRatio = top.engine.getAspectRatio(top.camera);
-    var d = top.camera.position.length();
-    var y = 2 * d * Math.tan(top.camera.fov / 2);
-    var x = y * aspectRatio;
-    console.log(x, y);
-    */
-    
     const panelOptions = {width: 140, height: 140};
-    const backgroundPanelOptions = {width: 140, height: 140};
     const panelPosition = new BABYLON.Vector3(0,0,190);
 
     // Info panel
@@ -449,168 +441,202 @@ export function createContentPanel(scene, localizedStrings) {
     infoPlane.position = panelPosition;
 
     // Info panel GUI texture
-    const adinfoPanel = GUI.AdvancedDynamicTexture.CreateForMesh(infoPlane, x, y);
-    adinfoPanel.name = "at_infoPanel";
-    adinfoPanel.renderScale = 1.5;
-
-    // Trying to make text crisper. Text blurry on mobile when not in fullscreen
-    //adinfoPanel.rootContainer.scaleX = window.devicePixelRatio;
-    //adinfoPanel.rootContainer.scaleY = window.devicePixelRatio;
-    //adinfoPanel.renderScale = 2;
+    const adinfoPanel = GUI.AdvancedDynamicTexture.CreateForMesh(infoPlane);
+    adinfoPanel.name = "_at_infoPanelVR";
 
     // Common constants
-    let textColor = "black";
-    let defaultColor = "#6400c1";
-    let fontSizeTitle = 42;
-    let fontSize = 26;
+    let titleFontSize = 60;
+    let descFontSize = 48;
+    let padding = 10;
+    let textColor = top.appSettings.fontColor;
+    let defaultColor = top.appSettings.primaryColor;
+    let fontFamily = top.appSettings.fontFamily;
     let controlWidthPrc = 0.9;
     let horAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
     let verAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-    let buttonHeight = 60; // in pixels
-    let buttonWidth = 300; // // in pixels
-    let fontFamily = "Arial";
+    let closeButtonSize = 100;
+
+    // Create sub panel (non stacking)
+    var rectRoot = new GUI.Rectangle("RootRect");
+    adinfoPanel.addControl(rectRoot);
+    rectRoot.isPointerBlocker = true;
+    rectRoot.height = 1.0;
+    rectRoot.width = 1.0;
+    rectRoot.background = "transparent";
+    rectRoot.color ="transparent";
+    rectRoot.onPointerEnterObservable.add(() => {
+        top.isBlocking3dElements = true;
+    });
+    rectRoot.onPointerOutObservable.add(() => {
+        top.isBlocking3dElements = false;
+    });
+
+    // Create background 
+    var rectBackground = new GUI.Rectangle("backgroundRect");
+    rectRoot.addControl(rectBackground);
+    rectBackground.isPointerBlocker = true;
+    rectBackground.background = top.appSettings.secondaryColor;
+    rectBackground.color = "transparent";
+    rectBackground.alpha = 1; // 0.85;
+
+    // Create stacking panel
+    var rect = new GUI.StackPanel("StackRect");
+    rectRoot.addControl(rect);
+    rect.isPointerBlocker = true;
+    rect.background = "transparent";
+    rect.height = 1.0;
+    rect.width = 1.0;
+
+    // Close button
+    var btnClose = GUI.Button.CreateSimpleButton("closeButton", "X");
+    rectRoot.addControl(btnClose);
+    btnClose.widthInPixels = closeButtonSize;
+    btnClose.heightInPixels = closeButtonSize;
+    btnClose.topInPixels = 2;
+    btnClose.leftInPixels = -2;
+    btnClose.background = "transparent";
+    btnClose.cornerRadius = 45;
+    btnClose.color = "transparent";
+    btnClose.fontFamily = "'Calibri'";
+    btnClose.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    btnClose.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    btnClose.onPointerDownObservable.add(() => {
+        infoPlaneHolder.hide();
+        top.isBlocking3dElements = false;
+    });
+    btnClose.onPointerEnterObservable.add(() => {
+        btnEllipse.background = top.appSettings.primaryColor_faded;
+        top.setPointer(true);
+    });
+    btnClose.onPointerOutObservable.add(() => {
+        btnEllipse.background = top.appSettings.primaryColor;
+        top.setPointer(false);
+    });
+    
+    var btnEllipse = new GUI.Ellipse();
+    btnEllipse.widthInPixels = closeButtonSize * 0.9;
+    btnEllipse.heightInPixels = closeButtonSize * 0.9;
+    btnEllipse.background = top.appSettings.primaryColor;
+    btnEllipse.color = "transparent";
+    btnClose.addControl(btnEllipse);
+    var tbCloseText = new GUI.TextBlock("closeButtonText", "x");
+    btnClose.addControl(tbCloseText);
+    tbCloseText.color = top.appSettings.fontColor;
+    tbCloseText.fontSizeInPixels = 50;
+    tbCloseText.paddingLeftInPixels = 2;
+    tbCloseText.paddingBottomInPixels = 8;
+
+    // Info.Image
+    var imageRect = new GUI.Rectangle("imageRect");
+    rect.addControl(imageRect);
+    imageRect.widthInPixels = 300;
+    imageRect.heightInPixels = 300;
+    imageRect.color = "transparent";
+    imageRect.background = "transparent";
+    imageRect.paddingTopInPixels = 10;
+    imageRect.paddingBottomInPixels = -10;
+    imageRect.paddingLeftInPixels = 0;
+    var image = new GUI.Image("infoImg", "./Resources/sample-image.png");
+    imageRect.addControl(image);
+    image.color = "transparent";
+    image.background = "transparent";
+    image.paddingLeftInPixels = -1;
+    image.paddingRightInPixels = -2;
+    image.paddingTopInPixels = -1;
+    image.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    image.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    image.stretch = GUI.Image.STRETCH_UNIFORM;
+    //image.stretch = GUI.Image.STRETCH_FILL;
 
     // Info.Title
     var tbTitle = new GUI.TextBlock("infoTitle", "Sample title");
-    adinfoPanel.addControl(tbTitle);
+    rect.addControl(tbTitle);
     tbTitle.color = defaultColor;
-    tbTitle.fontSizeInPixels = fontSizeTitle;
-    tbTitle.width = controlWidthPrc;
-    tbTitle.top = 50;
+    tbTitle.fontSizeInPixels = titleFontSize;
+    tbTitle.width = controlWidthPrc; // potrait only
+    tbTitle.heightInPixels = 100;
+    tbTitle.leftInPixels = 2;
+    tbTitle.paddingTopInPixels = padding;
+    tbTitle.paddingRightInPixels = -15;
     tbTitle.verticalAlignment = verAlignment;
     tbTitle.textHorizontalAlignment = horAlignment;
     tbTitle.textVerticalAlignment = verAlignment;
     tbTitle.fontFamily = fontFamily;
     tbTitle.fontWeight = "bold";
+    tbTitle.textWrapping = GUI.TextWrapping.Ellipsis;
 
     // Info.Description
+    var descriptionRect = new GUI.Rectangle("descriptionRect");
+    rect.addControl(descriptionRect);
+    descriptionRect.width = controlWidthPrc;
+    descriptionRect.heightInPixels = 480;
+    descriptionRect.paddingTopInPixels = 0;
+    descriptionRect.paddingRightInPixels = -5;
+    descriptionRect.verticalAlignment = verAlignment;
+    descriptionRect.color = "transparent";
+    descriptionRect.background = "transparent";
+
+    var tsv = new GUI.ScrollViewer("descriptionScrollViewer");
+    descriptionRect.addControl(tsv);
+    tsv.textHorizontalAlignment = horAlignment;
+    tsv.textVerticalAlignment = verAlignment;
+    tsv.barSize = 70;
+    tsv.thumbLength = 0.7;
+    tsv.barColor = defaultColor;
+    tsv.color = "transparent";
+    tsv.verticalBar.value = 0.0;
+
     var tbDesc = new GUI.TextBlock("infoDescription", "Lorem ipsum dolor sit amet, \nconsectetur adipiscing elit. Sed aliquam elementum ligula non laoreet. Proin urna tortor, aliquet consequat rutrum id, volutpat eget felis. Proin molestie tellus non neque vestibulum laoreet sit amet vel lorem. Morbi faucibus ut risus quis venenatis. Aliquam quis tempor odio,");
-    adinfoPanel.addControl(tbDesc);
+    tsv.addControl(tbDesc);
     tbDesc.color = textColor;
-    tbDesc.fontSizeInPixels = fontSize;
-    tbDesc.top = 550;
-    tbDesc.width = controlWidthPrc;
-    tbDesc.height = 0.38;
-    tbDesc.verticalAlignment = verAlignment;
+    tbDesc.fontSizeInPixels = descFontSize;
+    tbDesc.width = 1.0;
+    tbDesc.height = 1.0;
+    tbDesc.resizeToFit = true;
     tbDesc.textHorizontalAlignment = horAlignment;
     tbDesc.textVerticalAlignment = verAlignment;
     tbDesc.textWrapping = GUI.TextWrapping.WordWrap;
     tbDesc.fontFamily = fontFamily;
 
-    // Info.Image
-    var image = new GUI.Image("infoImg", "./Resources/sample-image.png");
-    adinfoPanel.addControl(image);
-    image.top = 140;
-    image.width = 0.9;
-    image.heightInPixels = 380;
-    image.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-    image.stretch = GUI.Image.STRETCH_UNIFORM;
-    //image.stretch = GUI.Image.STRETCH_FILL;
-
-    // TODO: make image on Plane. Without border? 
-    /*
-    const imgPlane = BABYLON.MeshBuilder.CreatePlane("infoImg2", {width: 10, height: 10});
-    infoPlane.addChild(imgPlane);
-    imgPlane.position = new BABYLON.Vector3.Zero();
-    */ 
-
     // Info.Link
     var btnLink = GUI.Button.CreateSimpleButton("linkButton", "");
-    adinfoPanel.addControl(btnLink);
-    btnLink.widthInPixels = buttonWidth;
-    btnLink.heightInPixels = buttonHeight;
+    rectRoot.addControl(btnLink);
+    btnLink.widthInPixels = 425;
+    btnLink.heightInPixels = 90;
     btnLink.background = defaultColor;
     btnLink.color = "transparent";
-    btnLink.fontSizeInPixels = 26;
-    btnLink.fontWeight = "bold";
+    btnLink.fontSizeInPixels = 38;
     btnLink.fontFamily = fontFamily;
-    btnLink.topInPixels = -25;
-    //btnLink.left = "-20%";
+    btnLink.topInPixels = -30;
     btnLink.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    btnLink.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
     btnLink.url = "https://www.google.com";
     // Info.Link.Text
     var tbLinkText = new GUI.TextBlock("linkButtonText", (localizedStrings && localizedStrings.moreInfo) || "MORE INFO");
     btnLink.addControl(tbLinkText);
     tbLinkText.color = "white";
     btnLink.onPointerDownObservable.add(() => {
-        window.open(btnLink.url, '_blank').focus();
+        console.log("Link navigation not implemented in VR");
     });
     btnLink.onPointerEnterObservable.add(() => {
-        tbLinkText.color = defaultColor;
-        btnLink.background = "white";
+        btnLink.background = top.appSettings.primaryColor_faded;
     });
     btnLink.onPointerOutObservable.add(() => {
-        tbLinkText.color = "white";
-        btnLink.background = defaultColor;
-    });
-    
-    // Close button
-    var btnClose = GUI.Button.CreateSimpleButton("closeButton", "X");
-    adinfoPanel.addControl(btnClose);
-    btnClose.widthInPixels = 120;
-    btnClose.heightInPixels = 120;
-    btnClose.background = "transparent";
-    btnClose.color = "transparent";
-    btnClose.fontWeight = "bold";
-    btnClose.fontFamily = "'Calibri'";
-    //btnClose.topInPixels = 25;
-    //btnClose.left = -25;
-    btnClose.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-    btnClose.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-    var tbCloseText = new GUI.TextBlock("closeButtonText", "x");
-    btnClose.addControl(tbCloseText);
-    tbCloseText.color = "black";
-    tbCloseText.fontSizeInPixels = 80;
-    btnClose.onPointerDownObservable.add(() => {/*console.log("closing info panel");*/ });
-    btnClose.onPointerEnterObservable.add(() => {
-        tbCloseText.color = "#333333";
-        //btnClose.background = "white";
-    });
-    btnClose.onPointerOutObservable.add(() => {
-        tbCloseText.color = "black";
-        //btnClose.background = defaultColor;
+        btnLink.background = top.appSettings.primaryColor;
     });
 
-    /*
-    var btnClose = GUI.Button.CreateSimpleButton("closeButton", "CLOSE");
-    adinfoPanel.addControl(btnClose);
-    btnClose.widthInPixels = buttonWidth;
-    btnClose.heightInPixels = buttonHeight;
-    btnClose.background = defaultColor;
-    btnClose.color = "white";
-    btnClose.fontSizeInPixels = 26;
-    btnClose.fontWeight = "bold";
-    btnClose.fontFamily = fontFamily;
-    btnClose.topInPixels = -25;
-    btnClose.left = "20%";
-    btnClose.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
-    btnClose.onPointerDownObservable.add(() => {
-        alert("closing.");
-    });
-    btnClose.onPointerEnterObservable.add(() => {
-        btnClose.color = defaultColor;
-        btnClose.background = "white";
-    });
-    btnClose.onPointerOutObservable.add(() => {
-        btnClose.color = "white";
-        btnClose.background = defaultColor;
-    });
-    */
-
-    // Background panel
-    const textPlaneBackground = BABYLON.MeshBuilder.CreatePlane("backgroundPlane", backgroundPanelOptions );
-    infoPlaneHolder.addChild(textPlaneBackground);
-    textPlaneBackground.isPickable = false;
-    textPlaneBackground.position = new BABYLON.Vector3(0,0,191);
-
-    var panelMat = new BABYLON.StandardMaterial("infoPanelMat", scene);
-    panelMat.emissiveColor = new BABYLON.Color3(1,1,1);
-    textPlaneBackground.visibility = 0.9;
-
-    textPlaneBackground.material = panelMat;
-
-    infoPlaneHolder.rotation.z = 3.14;
-    return {infoPlaneHolder, tbTitle, tbDesc, image, btnLink, btnClose};
+    // Register helper show/hide methods for advancedTexture contents
+    infoPlaneHolder.hide = () => {
+        console.log("Showing VR info panel");
+        rectRoot.isVisible = false;
+        top.isInfoPanelOpen = rectRoot.isVisible; // Used for blocking UI elements on mobile
+    }
+    infoPlaneHolder.show = () => {
+        console.log("Showing VR info panel");
+        rectRoot.isVisible = true;
+        top.isInfoPanelOpen = rectRoot.isVisible; // Used for blocking UI elements on mobile
+    }
+    return {infoPlaneHolder, tbTitle, tbDesc, image, btnLink};
 }
  
 // TODO: Unfinished and broken. Meant to unify duplicating code in tag/hotspot generation 

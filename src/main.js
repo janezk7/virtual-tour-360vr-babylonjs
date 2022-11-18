@@ -5,7 +5,7 @@ import { getEnvironments } from './Managers/environmentManager';
 import { tagManagerCastRayHandler } from './Managers/tagManager';
 import { hotspotManagerCastRayHandler } from './Managers/hotspotManager';
 import { localizeAppTexts } from './Managers/localizationManager';
-import { createContentPanelFullScreen, showAxis } from './Utilities/engineUtil';
+import { createContentPanel, createContentPanelVR, showAxis } from './Utilities/engineUtil';
 import { initializeDOM, setCanvasSize } from './domSetup';
 import "core-js/stable";
 import "regenerator-runtime/runtime";
@@ -42,9 +42,10 @@ const showEnvironmentOnStart_debug = isDebug && true;
 const environmentToShow_debug = 3;
 const showInfoPanelOnStart_debug = isDebug && false;
 const showInspector_debug = isDebug && true;
+const isVRMode_debug = isDebug && true;
 const showCameraAlphaIndicator_debug = isDebug && true;
 const showAxis_debug = isDebug && false;
-const flycamera_debug = isDebug && false;
+const flycamera_debug = isDebug && true;
 if(isDebug) {
     document.body.style.overflow = 'unset';
 }
@@ -68,7 +69,8 @@ top.camera = null;
 top.advancedTexture = null;
 top.axis = null;
 // Custom BabylonJS objects
-top.infoPanel = {holder: null, tbTitle: null, tbDesc: null, tbImage: null, btnLink: null};
+top.infoPanel = {holder: null, tbTitle: null, tbDesc: null, image: null, btnLink: null};
+top.infoPanelVR = {holder: null, tbTitle: null, tbDesc: null, image: null, btnLink: null};
 top.materials = {};
 // Methods
 top.setPointer = (isShown) => document.body.style.cursor = isShown ? 'pointer' : '';
@@ -120,12 +122,11 @@ initializeAppSettings(appSettingsJsonUri, () => {
 
             if(isDebug) {
                 showEnvironmentOnStart_debug && showEnvironment(environmentToShow_debug);
-                showInfoPanelOnStart_debug && top.infoPanel.holder.show();
+                showInfoPanelOnStart_debug && (isVRMode_debug ? top.infoPanelVR.holder.show(): top.infoPanel.holder.show());
             }
         });
     });
 });
-
 
 function setupEngine(canvas) {
     top.engine = new BABYLON.Engine(canvas, true, {preserveDrawingBuffer: true, stencil: true});
@@ -286,8 +287,18 @@ function createScene(engine, canvas) {
     // add GUI 
     addScreenUI(advancedTexture);
 
-    // Initialize XR experience (disabled for now)
-    scene.createDefaultXRExperienceAsync();
+    // Initialize XR experience
+    scene.createDefaultXRExperienceAsync().then(xrExp => {
+        xrExp.baseExperience.sessionManager.onXRSessionInit.add(() => {
+            console.log("XR Session starting");
+            top.infoPanel.holder.hide(); // Hide 2d panel if opened
+        });
+        xrExp.baseExperience.sessionManager.onXRSessionEnded.add(() => {
+            console.log("XR Session ending");
+            top.infoPanelVR.holder.hide(); // HIde 3d panel if opened
+        });
+        top.xrExperience = xrExp;
+    });
 
     return scene;
 };
@@ -345,6 +356,14 @@ function addScreenUI(advancedTexture) {
             return rad;
         }
         window.setInterval(function() {
+            if(top.xrExperience?.baseExperience?.sessionManager?.inXRSession) {
+                let xrCamRot = top.xrExperience?.baseExperience.camera.absoluteRotation.toEulerAngles();
+                tbDegrees.text = `x: ${Math.trunc(xrCamRot.x * 100) / 100.0}`;
+                tbDegrees.text += `\ny: ${Math.trunc(xrCamRot.y*100) / 100.0}`;
+                tbDegrees.text += `\nz: ${Math.trunc(xrCamRot.z*100) / 100.0}`;
+                tbDegrees.text += `\nw: ${Math.trunc(xrCamRot.w*100) / 100.0}`;
+                return;
+            }
             let rad_alpha = getRadianNormalized(top.camera.alpha);
             let degrees_alpha = Math.round(rad_alpha * 180 / Math.PI) % 360;
             tbDegrees.text = `Alpha: ${degrees_alpha} degrees (${rad_alpha} radian)`;
@@ -372,9 +391,39 @@ function addScreenUI(advancedTexture) {
 }
 
 // Creates info panel
-function initializeInfoPanel(localizedStrings) {
-    let {adinfoPanel, tbTitle, tbDesc, image, btnLink} = createContentPanelFullScreen(scene, localizedStrings);
-    top.infoPanel = {holder: adinfoPanel, tbTitle, tbDesc, image, btnLink};
+export function initializeInfoPanel(localizedStrings) {
+    // 2d info panel
+    let infoPanel = createContentPanel(scene, localizedStrings);
+    top.infoPanel = {
+        holder: infoPanel.adinfoPanel, 
+        tbTitle: infoPanel.tbTitle, 
+        tbDesc: infoPanel.tbDesc, 
+        image: infoPanel.image, 
+        btnLink: infoPanel.btnLink
+    };
+
+    // VR info panel
+    let infoPanelVR = createContentPanelVR(scene, localizedStrings);
+    infoPanelVR.infoPlaneHolder.position = top.camera.position;
+    top.scene.registerBeforeRender(() => {
+        // Update info panel to vr camera. (Not perfect)
+        if(top.xrExperience?.baseExperience?.sessionManager?.inXRSession) {
+            let vrRot = top.xrExperience?.baseExperience.camera.absoluteRotation.toEulerAngles();
+            infoPanelVR.infoPlaneHolder.rotation.y = vrRot.y;
+            infoPanelVR.infoPlaneHolder.rotation.x = vrRot.x;
+            return;
+        }
+        // Rotate based on non-vr camera. use when using 3d info panel for 2d camera
+        //infoPanelVR.infoPlaneHolder.rotation.y = -1 * top.camera.alpha + 1.5708;
+        //infoPanelVR.infoPlaneHolder.rotation.x = top.camera.beta + 1.5708;
+    });
+    top.infoPanelVR = {
+        holder: infoPanelVR.infoPlaneHolder, 
+        tbTitle: infoPanelVR.tbTitle, 
+        tbDesc: infoPanelVR.tbDesc, 
+        image: infoPanelVR.image, 
+        btnLink: infoPanelVR.btnLink
+    };
 }
  
 // DOM setup
@@ -512,14 +561,25 @@ export function reinitializeLoadedEnvironmentDefinitions() {
 }
 
 export function showInfoPanel(title, description, imageUrl, linkUrl) {
-    var panel = top.infoPanel;
-    panel.tbTitle.text = title;
-    panel.tbDesc.text = description;
-    panel.image.source = imageUrl;
-    panel.btnLink.url = linkUrl;
-    panel.btnLink.isVisible = linkUrl;
+    let isVRMode = top.xrExperience?.baseExperience?.sessionManager?.inXRSession || isVRMode_debug;
 
-    panel.holder.show();
+    if(isVRMode) {
+        var panel3d = top.infoPanelVR;
+        panel3d.tbTitle.text = title;
+        panel3d.tbDesc.text = description;
+        panel3d.image.source = imageUrl;
+        panel3d.btnLink.url = linkUrl;
+        panel3d.btnLink.isVisible = linkUrl;
+        panel3d.holder.show();
+    } else {
+        var panel2d = top.infoPanel;
+        panel2d.tbTitle.text = title;
+        panel2d.tbDesc.text = description;
+        panel2d.image.source = imageUrl;
+        panel2d.btnLink.url = linkUrl;
+        panel2d.btnLink.isVisible = linkUrl;
+        panel2d.holder.show();
+    }
 }
 
 export function showEnvironment(indexToShow, offsetCameraDegrees) {
@@ -551,6 +611,7 @@ export function showEnvironment(indexToShow, offsetCameraDegrees) {
 
     // Hide info panel
     top.infoPanel.holder.hide();
+    top.infoPanelVR.holder.hide();
 
     // Cleanup current environment
     // Hide current hotspots and tags

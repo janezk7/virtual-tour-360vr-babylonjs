@@ -124,7 +124,34 @@
                 "dest": "london"
             }
         ],
-        "tags": []
+        "tags": [{
+                "text": "Info front",
+                "title": "FRONT",
+                "description": "Sample description ",
+                "imageUrl": "./Resources/sample-image.jpg",
+                "websiteUrl": "https://www.google.com",
+                "isLeft": false,
+                "pos": {
+                    "_isDirty": false,
+                    "_x": -187.8549429891808,
+                    "_y": -20.776147093401818,
+                    "_z": 25.72881183130774
+                }
+            }, {
+                "text": "Info back",
+                "title": "BACK",
+                "description": "Sample description ",
+                "imageUrl": "./Resources/sample-image.jpg",
+                "websiteUrl": "https://www.google.com",
+                "isLeft": false,
+                "pos": {
+                    "_isDirty": false,
+                    "_x": 190.62180849186828,
+                    "_y": 6.812018198163694,
+                    "_z": -4.632830023439503
+                }
+            }
+        ]
     }, {
         "orderNum": 7,
         "isVideo": true,
