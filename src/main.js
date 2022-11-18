@@ -99,6 +99,12 @@ top.loadedEnvironmentModels = [];
 top.isBlocking3dElements = false;
 top.isInfoPanelOpen = false;
 top.is3dElementInteractionDisabled = () => {
+    // 1. Never block 3d element interaction in VR mode
+    // 2. Block 3d element interaction by default on mobile when info panel is opened
+    // 3. Block 3d element interaction when hovering over info panel (prevents clicking hotspots when clicking on info panel controls)
+    let isVR = top.xrExperience?.baseExperience?.sessionManager?.inXRSession;
+    if(isVR)
+        return false;
     let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); // Used to block 3d element touch interaction when trying to block 3d elements 
     return top.isBlocking3dElements || (top.isInfoPanelOpen && isMobile);
 }
@@ -295,7 +301,10 @@ function createScene(engine, canvas) {
         });
         xrExp.baseExperience.sessionManager.onXRSessionEnded.add(() => {
             console.log("XR Session ending");
-            top.infoPanelVR.holder.hide(); // HIde 3d panel if opened
+            top.infoPanelVR.holder.hide(); // Hide 3d panel if opened
+
+            // BUGFIX: Fixes bug when unable to interact with 3d elements when exiting immersive experience
+            top.isBlocking3dElements = false; 
         });
         top.xrExperience = xrExp;
     });
