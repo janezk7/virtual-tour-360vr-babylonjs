@@ -220,6 +220,7 @@ function createScene(engine, canvas) {
 
     let camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2,  Math.PI / 2, 0, BABYLON.Vector3.Zero(), scene);
     top.camera = camera;
+    camera.fov = 1.3; // Higher fov needed for comftable view of 360 media
     camera.panningSensibility = 0;
     camera.angularSensibilityX = 3000 * -1;
     camera.angularSensibilityY = 3000 * -1;
@@ -279,12 +280,6 @@ function createScene(engine, canvas) {
     top.pickingDomeMesh = pickingDome.getChildMeshes()[0];
     top.pickingDomeMesh.visibility = 0;
     top.pickingDomeMesh.isPickable = false;
-
-    //uncomment
-    //dome.fovMultiplier = 2;
-    //top.camera.fov = .7;
-    //top.camera.fov = 1.5; // <- maybe use camera fov instead?
-    top.camera.fov = 1;
 
     // 3d GUI manager
     top.gui3d = new GUI.GUI3DManager(scene);
