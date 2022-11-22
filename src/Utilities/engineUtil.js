@@ -430,6 +430,7 @@ export function createContentPanel(scene, localizedStrings) {
 // Create 3d content panel (Recommended for VR)
 export function createContentPanelVR(scene, localizedStrings) {
     var infoPlaneHolder = BABYLON.Mesh.CreateSphere("infoPlaneHolder", 16, 2, scene);
+    infoPlaneHolder.visibility = 0.0;
 
     // Constants
     const panelOptions = {width: 140, height: 140};
@@ -646,6 +647,7 @@ export function createContentPanelVR(scene, localizedStrings) {
 export function createVrCursor() {
     var vrCursorHolder = BABYLON.MeshBuilder.CreateSphere("_vrCursorSphere", { segments: 16, diameter: 2}, top.scene);
     vrCursorHolder.isPickable = false;
+    vrCursorHolder.visibility = 0.0;
     var cursorPlane = BABYLON.MeshBuilder.CreatePlane("vrCursorPlane", {width: 1, height: 1});
     vrCursorHolder.addChild(cursorPlane);
     cursorPlane.position = new BABYLON.Vector3(0,0,150);

@@ -47,6 +47,7 @@ const showInspector_debug = isDebug && true;
 const isVRMode_debug = isDebug && true;
 const showCameraAlphaIndicator_debug = isDebug && true;
 const showAxis_debug = isDebug && false;
+const createVrCursorOnStart_debug = isDebug && false;
 const flycamera_debug = isDebug && true;
 if(isDebug) {
     document.body.style.overflow = 'unset';
@@ -331,7 +332,7 @@ function initializeXrExperience() {
         xrExp.baseExperience.sessionManager.onXRSessionEnded.add(() => {
             console.log("XR Session ending");
             top.infoPanelVR.holder.hide(); // Hide 3d panel if opened
-            top.vrCursor.setEnabled(false);
+            top.vrCursor?.setEnabled(false);
 
             // BUGFIX: Fixes bug when unable to interact with 3d elements when exiting immersive experience
             top.isBlocking3dElements = false; 
