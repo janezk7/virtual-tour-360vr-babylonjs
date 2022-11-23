@@ -40,15 +40,16 @@ if(showDevelopmentTools) {
 
 // Debug fields
 const isDebug = true;
-const showEnvironmentOnStart_debug = isDebug && true;
-const environmentToShow_debug = 3;
-const showInfoPanelOnStart_debug = isDebug && false;
-const showInspector_debug = isDebug && true;
-const isVRMode_debug = isDebug && true;
-const showCameraAlphaIndicator_debug = isDebug && true;
-const showAxis_debug = isDebug && false;
-const createVrCursorOnStart_debug = isDebug && false;
-const flycamera_debug = isDebug && true;
+const showHiddenEnvironments            = isDebug && true;
+const showEnvironmentOnStart_debug      = isDebug && true;
+const environmentToShow_debug           = 4;
+const showInspector_debug               = isDebug && false;
+const flycamera_debug                   = isDebug && false;
+const showInfoPanelOnStart_debug        = isDebug && false;
+const showCameraAlphaIndicator_debug    = isDebug && false;
+const isVRMode_debug                    = isDebug && false;
+const showAxis_debug                    = isDebug && false;
+const createVrCursorOnStart_debug       = isDebug && false;
 if(isDebug) {
     document.body.style.overflow = 'unset';
 }
@@ -212,7 +213,7 @@ function createScene(engine, canvas) {
     let scene = new BABYLON.Scene(engine);
     top.scene = scene;
 
-    var hdrTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("Textures/studio.env", scene);
+    var hdrTexture = BABYLON.CubeTexture.CreateFromPrefilteredData(domainDirectory + "Textures/studio.env", scene);
     scene.environmentTexture = hdrTexture;
     scene.environmentIntensity = intensityIBL;
 
@@ -263,7 +264,10 @@ function createScene(engine, canvas) {
         size: 1000,
         useDirectMapping: false
     };
-    top.photoDome = new BABYLON.PhotoDome("photoDome", "./Resources/placeholder.jpg", photoDomeOptions, scene);
+    
+    let photoDome = new BABYLON.PhotoDome("photoDome", domainDirectory + "Resources/placeholder.jpg", photoDomeOptions, scene);
+    photoDome.material.reflectionBlur = 0.01; // Bugfix: hides seam on 360 image dome
+    top.photoDome = photoDome;
 
     // Create video dome for 360 videos
     let videoDomeOptions = {
@@ -271,9 +275,9 @@ function createScene(engine, canvas) {
         clickToPlay: false,
         autoPlay: false,
         size: 1000,
-        poster: "./Resources/placeholder.jpg"
+        poster: domainDirectory + "Resources/placeholder.jpg"
     };
-    top.videoDome = new BABYLON.VideoDome("videoDome", "./Resources/placeholderVideo.mp4", videoDomeOptions, scene);
+    top.videoDome = new BABYLON.VideoDome("videoDome", domainDirectory + "Resources/placeholderVideo.mp4", videoDomeOptions, scene);
 
     // Create picking dome and get dome mesh for raycasting
     let pickingDome = new BABYLON.PhotoDome("raycastPickingDome", "./Resources/placeholder.jpg", { size:500 }, scene);
@@ -721,6 +725,7 @@ export function showEnvironment(indexToShow, offsetCameraDegrees) {
     top.onEnvironmentChanged();
 }
 
+// Select dropdown for dev interface
 export function populateDestinationSelect() {
     var selectEnv = document.getElementById('selectDestinationEnvironment');
     selectEnv.innerHTML = "";
@@ -733,17 +738,24 @@ export function populateDestinationSelect() {
     }
 }
 
+// Destination list shown below canvas
 export function populateDestinationList() {
     var envList = document.getElementById('envList');
     envList.innerHTML = "";
+    let envCounter = 0;
     for(let i = 0; i < top.environments.length; i++) {
         let env = top.environments[i];
+        if(env.isHidden && !showHiddenEnvironments) 
+            continue;
+        
+        envCounter += 1;
         var item = document.createElement("a");
         item.href = "#";
         item.className = "list-group-item list-group-item-action";
         item.onclick = (ev) => { showEnvironment(i)}
+        let hiddenIndicator = env.isHidden ? "<i>(hidden) </i> " : "";
         let lockedIndicator = !top.isAuthorized ? "<b class='lockedItem'>(locked)</b> " : "<b class='unlockedItem'>(unlocked)</b> "
-        item.innerHTML = env.orderNum + ". " + (env.isLocked ? lockedIndicator : '') + env.name;
+        item.innerHTML = `${hiddenIndicator} ${envCounter}. ${env.isLocked ? lockedIndicator : ''} ${env.name}`;
         envList.appendChild(item);
     }
 }

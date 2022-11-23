@@ -31,6 +31,7 @@ function getEnvironmentIndexByName(environmentName, environments){
 var createEnvironment = function (environmentDefinition) {    
     return {
         orderNum: environmentDefinition.orderNum,
+        isHidden: environmentDefinition.isHidden,
         isVideo: environmentDefinition.isVideo,
         name: environmentDefinition.name,
         isLocked: environmentDefinition.isLocked,
@@ -144,22 +145,26 @@ function getEnvironments(definitions) {
     return environments;
 }
 
-function addEnvironment(orderNum, isVideo, name, isLocked, uri) {
-    var newDefinition = createEnvironmentDefinition(orderNum, isVideo, name, isLocked, uri);
+function addEnvironment(orderNum, isHidden, isVideo, name, isLocked, uri) {
+    var newDefinition = createEnvironmentDefinition({orderNum, isHidden, isVideo, name, isLocked, uri});
     var newEnvironment = createEnvironment(newDefinition);
 
     top.environments.push(newEnvironment);
     console.log("New environment added. Count: "+ top.environments.length);
 }
 
-function createEnvironmentDefinition(orderNum, isVideo, name, isLocked, uri) {
+function createEnvironmentDefinition({orderNum, name = "", isHidden = false, isVideo = false, isLocked = false, uri = "", hotspots = [], tags = [], models = []}) {
     return {
         orderNum: orderNum,
+        isHidden: isHidden,
         isVideo: isVideo,
         name: name,
         isLocked, isLocked,
-        uri: uri
+        uri: uri,
+        hotspots: hotspots,
+        tags: tags,
+        models: models
     };
 }
 
-export {getEnvironments, addEnvironment}
+export {getEnvironments, addEnvironment, createEnvironmentDefinition}

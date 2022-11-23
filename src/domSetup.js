@@ -145,10 +145,11 @@ export function initializeDOM(domainDirectory, showDevelopmentTools) {
             let orderNum = top.environments.length + 1;
             let envName = document.getElementById('inputEnvName').value;
             let isLocked = document.getElementById("cbIsLockedEnvironment").checked;
+            let isHidden = document.getElementById("cbIsHiddenEnvironment").checked;
             let isVideo = document.getElementById("cbIsVideo").checked;
             let url = document.getElementById('inputEnvUrl').value;
         
-            addEnvironment(orderNum, isVideo, envName, isLocked, url);
+            addEnvironment(orderNum, isHidden, isVideo, envName, isLocked, url);
         
             populateDestinationSelect();
             populateDestinationList();

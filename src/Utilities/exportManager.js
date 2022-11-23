@@ -1,3 +1,5 @@
+import { createEnvironmentDefinition } from "../Managers/environmentManager";
+
 export function exportEnvironments(environments) {
     // Generate definitions
     let environmentDefinitions = [];
@@ -30,16 +32,17 @@ export function exportEnvironments(environments) {
             })   
         );
 
-        let definition = {
+        let definition = createEnvironmentDefinition({
             orderNum: env.orderNum,
-            isVideo: env.isVideo,
             name: env.name,
+            isHidden: env.isHidden,
+            isVideo: env.isVideo,
             isLocked: env.isLocked,
             uri: env.uri, // !env.isLocked && env.uri
             hotspots: hotspots,
             tags: tags,
             models: env.models
-        }
+        });
 
         environmentDefinitions.push(definition);
     }
