@@ -10,7 +10,7 @@ import { initializeDOM, setCanvasSize } from './domSetup';
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 import 'babylonjs-loaders';
-import { loadModel } from './Managers/modelManager';
+import { loadModel, modelManagerCastRayHandler } from './Managers/modelManager';
 import { loadAppTextureMaterials } from './Managers/materialManager';
 
 // Deployment
@@ -96,9 +96,10 @@ top.localizedStrings = {};
 top.isAuthorized = false;
 top.isFullscreen = false;
 top.importedEnvironmentsJson = null;
-top.hotspotManager = { isPlacingMode: false, isLeft: false, hotspots: [] };
-top.tagManager = { isPlacingMode: false, isLeft: false, tags: [] };
-top.loadedEnvironmentModels = [];
+top.hotspotManager = { isPlacingMode: false, isLeft: false };
+top.tagManager = { isPlacingMode: false, isLeft: false };
+top.modelManager = { isPlacingMode: false, loadedModel: null, loadedModelUrl: null };
+top.loadedEnvironmentModels = []; 
 
 // Custom gui blocking solution (3d elements check this to handle pointer events)
 top.isBlocking3dElements = false;
@@ -183,6 +184,8 @@ function setupScene(engine, canvas) {
             tagManagerCastRayHandler();
         } else if (top.hotspotManager.isPlacingMode) {
             hotspotManagerCastRayHandler();
+        } else if (top.modelManager.isPlacingMode) {
+            modelManagerCastRayHandler();
         }
     }
 
@@ -265,7 +268,7 @@ function createScene(engine, canvas) {
         useDirectMapping: false
     };
     
-    let photoDome = new BABYLON.PhotoDome("photoDome", domainDirectory + "Resources/placeholder.jpg", photoDomeOptions, scene);
+    let photoDome = new BABYLON.PhotoDome("_photoDome", domainDirectory + "Resources/placeholder.jpg", photoDomeOptions, scene);
     photoDome.material.reflectionBlur = 0.01; // Bugfix: hides seam on 360 image dome
     top.photoDome = photoDome;
 
@@ -279,11 +282,17 @@ function createScene(engine, canvas) {
     };
     top.videoDome = new BABYLON.VideoDome("videoDome", domainDirectory + "Resources/placeholderVideo.mp4", videoDomeOptions, scene);
 
-    // Create picking dome and get dome mesh for raycasting
-    let pickingDome = new BABYLON.PhotoDome("raycastPickingDome", "./Resources/placeholder.jpg", { size:500 }, scene);
+    // Create picking dome and get dome mesh for raycasting (hotspots and tags)
+    let pickingDome = new BABYLON.PhotoDome("_raycastPickingDome", "./Resources/placeholder.jpg", { size: 500 }, scene);
     top.pickingDomeMesh = pickingDome.getChildMeshes()[0];
     top.pickingDomeMesh.visibility = 0;
     top.pickingDomeMesh.isPickable = false;
+
+    // Create picking dome and get dome mesh for raycasting (3d models)
+    let pickingDomeModel = new BABYLON.PhotoDome("_raycastPickingDomeModel", './Resources/placeholder.jpg', { size: 250 }, scene);
+    top.pickingDomeModelMesh = pickingDomeModel.getChildMeshes()[0];
+    top.pickingDomeModelMesh.visibility = 0;
+    top.pickingDomeModelMesh.isPickable = false;
 
     // 3d GUI manager
     top.gui3d = new GUI.GUI3DManager(scene);

@@ -41,7 +41,7 @@ export function exportEnvironments(environments) {
             uri: env.uri, // !env.isLocked && env.uri
             hotspots: hotspots,
             tags: tags,
-            models: env.models
+            models: env.models // models are already only definitions (serializable)
         });
 
         environmentDefinitions.push(definition);

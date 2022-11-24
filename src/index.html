@@ -18,7 +18,7 @@
   -->
 </head>
 <body>
-  <div id="editInterface">
+  <div id="editInterface" style="visibility: collapse">
     <div id="editInterfaceTitle">3d Model: <span id="selected3dModel">Tree</span></div>
     <label for="rangeSize" class="form-label">Size</label>
     <input type="range" class="form-range" id="rangeSize">
@@ -161,21 +161,11 @@
               <div class="tab-pane " id="model3d" role="tabpanel" aria-labelledby="model3d-tab">
                 <div class="row mb-3">
                   <h2>3d Model</h2>
-                  <label for="rangeSize" class="form-label">Size</label>
-                  <input type="range" class="form-range" id="rangeSize">
-                  <label for="rangeSize" class="form-label">Position X</label>
-                  <input type="range" class="form-range" id="rangeSize">
-                  <label for="rangeSize" class="form-label">Position Y</label>
-                  <input type="range" class="form-range" id="rangeSize">
-                  <label for="rangeSize" class="form-label">Position Z</label>
-                  <input type="range" class="form-range" id="rangeSize">
-                  <label for="rangeSize" class="form-label">Rotation X</label>
-                  <input type="range" class="form-range" id="rangeSize">
-                  <label for="rangeSize" class="form-label">Rotation Y</label>
-                  <input type="range" class="form-range" id="rangeSize">
-                  <label for="rangeSize" class="form-label">Rotation Z</label>
-                  <input type="range" class="form-range" id="rangeSize">
-                  <button type="button" class="btn btn-primary col" id="btnPlace3dModel" >Place model</button>
+                  <label for="model3d" class="form-label leftAlign">3d model url</label>
+                  <input name="model3d" class="form-control" id="input3dModel" width="250px" placeholder="e.g.: https://example.com/banana.glb" value="./Resources/Models/BoxTextured.glb" />
+                  <button type="button" class="btn btn-primary" id="btnLoad3dModel">1. Load 3d Model</button>
+                  <p>Loaded file: <span id="loadedModelFile">/</span></p>
+                  <button type="button" class="btn btn-primary" id="btnShow3dModelControls">2. Place 3d Model</button>
                 </div>
               </div>
               <div class="tab-pane " id="registerenvironment" role="tabpanel" aria-labelledby="registerenvironment-tab">

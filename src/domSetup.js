@@ -8,6 +8,7 @@ import {
 } from "./main";
 import { addEnvironment } from "./Managers/environmentManager";
 import { toggleHotspotPlacingMode } from "./Managers/hotspotManager";
+import { loadAndCacheModel, loadModel, toggleModelPlacingModel } from "./Managers/modelManager";
 import { toggleTagPlacingMode } from "./Managers/tagManager";
 import { exportEnvironments } from "./Utilities/exportManager";
 
@@ -161,6 +162,11 @@ export function initializeDOM(domainDirectory, showDevelopmentTools) {
         document.getElementById('btnToggleHotspotRight').onclick = () => toggleHotspotPlacingMode(false);
         document.getElementById('btnToggleTagLeft').onclick = () => toggleTagPlacingMode(true);
         document.getElementById('btnToggleTagRight').onclick = () => toggleTagPlacingMode(false);
+
+        // 3d model loading
+        let modelUrl = document.getElementById('input3dModel').value;
+        document.getElementById('btnLoad3dModel').onclick = () => loadAndCacheModel(modelUrl);
+        document.getElementById('btnShow3dModelControls').onclick = () => toggleModelPlacingModel();
     }
 }
 
