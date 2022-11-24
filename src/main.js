@@ -131,12 +131,12 @@ initializeAppSettings(appSettingsJsonUri, () => {
         initializeInfoPanel(top.localizedStrings);
         initializeEnvironments(defaultEnvironmentsJsonUri, () => {
             // Other initialization code...
-            showEnvironment(initialEnvironmentIndex);
-
-            if(isDebug) {
-                showEnvironmentOnStart_debug && showEnvironment(environmentToShow_debug);
-                showInfoPanelOnStart_debug && (isVRMode_debug ? top.infoPanelVR.holder.show(): top.infoPanel.holder.show());
+            showInfoPanelOnStart_debug && (isVRMode_debug ? top.infoPanelVR.holder.show(): top.infoPanel.holder.show());
+            if(showEnvironmentOnStart_debug) {
+                showEnvironment(environmentToShow_debug);
+                return;
             }
+            showEnvironment(initialEnvironmentIndex);
         });
     });
 });

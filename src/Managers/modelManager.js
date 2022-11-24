@@ -39,6 +39,10 @@ function loadAndCacheModel() {
         loadedModel.isPickable = false;
         loadedModel.visibility = 0.5;
         loadedModel.setEnabled(false);
+
+        // Stop animations
+        loadedModel.getChildren((c) => top.scene.stopAnimation(c), false);
+
         loadedModelFileInput.innerText = `Model loaded successfuly : ${loadedModel.name}`;
     }, (error) => {
         console.log(error);
@@ -83,17 +87,17 @@ function modelManagerCastRayHandler() {
         let modelSceneName = getModelName(currentEnvironment.name, modelName, currentEnvironment.models.length);
 
         // 1. Clone loaded model
-        let modelInstance = model.clone();
+        let modelInstance = model.clone(); // TODO: animations don't work after cloning. Consider loading with AssetContainer or simply load a new instance (not optimal)
         modelInstance.name = `_${modelSceneName}`;
 
         // 2. place where hit was picked
         modelInstance.position = hit.pickedPoint;
         modelInstance.setEnabled(true);
 
-        // 3. show edit interface (update/reset field values)
+        // 4. show edit interface (update/reset field values)
         // Not yet implemented.
 
-        // 4. Add model object to environment and loaded mesh to current loaded models 
+        // 5. Add model object to environment and loaded mesh to current loaded models 
         let modelObject = {
             name: modelName,
             url: top.modelManager.loadedModelUrl,
