@@ -15,30 +15,35 @@ function loadModel(name, modelUrl, modelReturnCallback, onErrorCallback) {
             modelReturnCallback(loadedModel);
         },
         function (prog) {
-            console.log("P: ", prog);
+            // Progress function
+            //console.log("P: ", prog);
         },
         function (scene, message, exception) {
+            console.log("Something went wrong: ", message);
             onErrorCallback({message, exception});
         }
     );
 }
 
-function loadAndCacheModel(modelUrl) {
+function loadAndCacheModel() {
+    let modelUrl = document.getElementById('input3dModel').value;
+    let loadedModelFileInput = document.getElementById('loadedModelFile');
+    loadedModelFileInput.innerText = "";
     loadModel("_loadedModel", modelUrl
     , (loadedModel) => {
         top.modelManager.loadedModel && top.modelManager.loadedModel.dispose();
         top.modelManager.loadedModel = loadedModel;
         top.modelManager.loadedModelUrl = modelUrl;
-        let size = 40;
+        let size = 80;
         loadedModel.scaling = new BABYLON.Vector3(size,size,size);
         loadedModel.isPickable = false;
         loadedModel.visibility = 0.5;
         loadedModel.setEnabled(false);
-        let successMsg = `Model loaded successfuly : ${loadedModel.name}`;
-        document.getElementById('loadedModelFile').innerText = successMsg;
+        loadedModelFileInput.innerText = `Model loaded successfuly : ${loadedModel.name}`;
     }, (error) => {
-        let errorMsg = error;
-        document.getElementById('loadedModelFile').innerText = errorMsg; 
+        console.log(error);
+        let errorMsg = error.message;
+        loadedModelFileInput.innerText = errorMsg; 
     });
 }
 
@@ -73,11 +78,13 @@ function modelManagerCastRayHandler() {
         top.camera.resetToDefault();
         
         let currentEnvironment = top.environments[top.currentEnvironmentIndex];
-        let modelBaseName = getModelName(currentEnvironment.name, currentEnvironment.models.length);
+        let fullFilename = top.modelManager.loadedModelUrl.substring(top.modelManager.loadedModelUrl.lastIndexOf('/')+1);
+        let modelName = fullFilename.split('.').slice(0,-1).join('.');
+        let modelSceneName = getModelName(currentEnvironment.name, modelName, currentEnvironment.models.length);
 
         // 1. Clone loaded model
         let modelInstance = model.clone();
-        modelInstance.name = `mesh_${modelBaseName}`;
+        modelInstance.name = `_${modelSceneName}`;
 
         // 2. place where hit was picked
         modelInstance.position = hit.pickedPoint;
@@ -86,15 +93,18 @@ function modelManagerCastRayHandler() {
         // 3. show edit interface (update/reset field values)
         // Not yet implemented.
 
-        // 4. Add model definition to environment and loaded model to current loaded models 
-        top.loadedEnvironmentModels.push(modelInstance);
-        currentEnvironment.models.push(createModelDefinition({
-            name: modelInstance.name, 
+        // 4. Add model object to environment and loaded mesh to current loaded models 
+        let modelObject = {
+            name: modelName,
             url: top.modelManager.loadedModelUrl,
             pos: modelInstance.position,
             rot: modelInstance.rotation,
             scale: modelInstance.scaling,
-        }));
+            meshMarker: modelInstance
+        }
+        
+        currentEnvironment.models.push(modelObject);
+        top.loadedEnvironmentModels.push(modelObject.meshMarker);      
 
         toggleModelPlacingModel();
 
@@ -104,6 +114,7 @@ function modelManagerCastRayHandler() {
     }
 }
 
+// Export model
 function createModelDefinition({name, pos, rot, scale, url}) {
     return {
         name: name,
@@ -114,4 +125,15 @@ function createModelDefinition({name, pos, rot, scale, url}) {
     };
 }
 
-export { loadModel, loadAndCacheModel, toggleModelPlacingModel, modelManagerCastRayHandler }
+function applyModelTransformChanges(environmentModel) {
+    let m = environmentModel;
+    if(!m.meshMarker) return;
+    let pos = m.meshMarker.position;
+    let rot = m.meshMarker.rotation;
+    let scale = m.meshMarker.scaling;
+    m.pos = new BABYLON.Vector3(pos.x, pos.y, pos.z);
+    m.rot = new BABYLON.Vector3(rot.x, rot.y, rot.z);
+    m.scale = new BABYLON.Vector3(scale.x, scale.y, scale.z);
+}
+
+export { loadModel, loadAndCacheModel, toggleModelPlacingModel, modelManagerCastRayHandler, createModelDefinition, applyModelTransformChanges }

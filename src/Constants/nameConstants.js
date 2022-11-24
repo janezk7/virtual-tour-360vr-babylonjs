@@ -7,6 +7,6 @@ export function getTagName(environmentName, index) {
     return "tag_" + environmentName + "_" + index;
 }
 
-export function getModelName(environmentName, index) {
-    return `model_${environmentName}_${index}`;
+export function getModelName(environmentName, modelName, index) {
+    return `model_${environmentName}_${modelName}_${index}`;
 }

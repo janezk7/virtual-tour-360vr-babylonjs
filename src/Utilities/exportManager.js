@@ -1,13 +1,19 @@
 import { createEnvironmentDefinition } from "../Managers/environmentManager";
+import { applyModelTransformChanges, createModelDefinition } from "../Managers/modelManager";
 
 export function exportEnvironments(environments) {
     // Generate definitions
     let environmentDefinitions = [];
-    console.log(environments);
+
+    // Pre-export work
+    // Apply model transform changes
+    top.environments[top.currentEnvironmentIndex].models?.forEach(m => applyModelTransformChanges(m));
+
     for(let i = 0; i < environments.length; i++) {
         let env = environments[i];
         let hotspots = [];
         let tags = [];
+        let models = [];
 
         env.hotspots.forEach(m => 
             hotspots.push({
@@ -32,6 +38,16 @@ export function exportEnvironments(environments) {
             })   
         );
 
+        env.models.forEach(m => {
+            models.push(createModelDefinition({
+                name: m.name, 
+                url: m.url,
+                pos: m.pos,
+                rot: m.rot,
+                scale: m.scale,
+            }));
+        });
+
         let definition = createEnvironmentDefinition({
             orderNum: env.orderNum,
             name: env.name,
@@ -41,7 +57,7 @@ export function exportEnvironments(environments) {
             uri: env.uri, // !env.isLocked && env.uri
             hotspots: hotspots,
             tags: tags,
-            models: env.models // models are already only definitions (serializable)
+            models: models
         });
 
         environmentDefinitions.push(definition);

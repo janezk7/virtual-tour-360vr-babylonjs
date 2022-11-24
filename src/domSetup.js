@@ -164,8 +164,7 @@ export function initializeDOM(domainDirectory, showDevelopmentTools) {
         document.getElementById('btnToggleTagRight').onclick = () => toggleTagPlacingMode(false);
 
         // 3d model loading
-        let modelUrl = document.getElementById('input3dModel').value;
-        document.getElementById('btnLoad3dModel').onclick = () => loadAndCacheModel(modelUrl);
+        document.getElementById('btnLoad3dModel').onclick = () => loadAndCacheModel();
         document.getElementById('btnShow3dModelControls').onclick = () => toggleModelPlacingModel();
     }
 }

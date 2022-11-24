@@ -43,7 +43,7 @@ var createEnvironment = function (environmentDefinition) {
     };
 }
 
-// Define navigation hotspots
+// Create navigation hotspots for environment
 // Note: requires list of all environments with isLocked field
 function getHotspots(environmentDefinition, allEnvironments) {
     let hotspots = [];
@@ -78,7 +78,7 @@ function getHotspots(environmentDefinition, allEnvironments) {
     return hotspots;
 }
 
-// Define information tags
+// Create information tags for environment
 function getTags(environmentDefinition) {
     let tags = [];
     if(environmentDefinition.tags) {
@@ -112,6 +112,13 @@ function getTags(environmentDefinition) {
     return tags;
 }
 
+// Define models for environment
+function getModels(environmentDefinition) {
+    let models = [];
+    // Models are loaded and displayed on the fly.
+    models = environmentDefinition.models;
+    return models;
+}
 
 function getEnvironments(definitions) {
     let environments = []; 
@@ -136,7 +143,7 @@ function getEnvironments(definitions) {
         let envIndex = envIndexDict[envDef.name];
         environments[envIndex].hotspots = getHotspots(envDef, environments);
         environments[envIndex].tags = getTags(envDef);
-        environments[envIndex].models = envDef.models; // We load and display models on the fly
+        environments[envIndex].models = getModels(envDef);
     });
     
     // Define helper functions

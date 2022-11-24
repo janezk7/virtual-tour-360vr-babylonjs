@@ -628,7 +628,8 @@ export function createContentPanelVR(scene, localizedStrings) {
 
     // Register helper show/hide methods for advancedTexture contents
     infoPlaneHolder.hide = () => {
-        console.log("Showing VR info panel");
+        //console.log("Hiding VR info panel");
+        //rectRoot.isVisible = false;
         infoPlaneHolder.setEnabled(false);
         top.isInfoPanelOpen = false; // Used for blocking UI elements on mobile
     }

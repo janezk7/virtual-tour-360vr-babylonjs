@@ -10,8 +10,9 @@ import { initializeDOM, setCanvasSize } from './domSetup';
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 import 'babylonjs-loaders';
-import { loadModel, modelManagerCastRayHandler } from './Managers/modelManager';
+import { applyModelTransformChanges, loadModel, modelManagerCastRayHandler } from './Managers/modelManager';
 import { loadAppTextureMaterials } from './Managers/materialManager';
+import { getModelName } from './Constants/nameConstants';
 
 // Deployment
 const isProduction = false; // For loading definitions
@@ -676,6 +677,9 @@ export function showEnvironment(indexToShow, offsetCameraDegrees) {
     });
     top.environments[top.currentEnvironmentIndex].tags?.forEach(t => t.guiElement.isVisible = false);
 
+    // Apply model transform changes
+    top.environments[top.currentEnvironmentIndex].models?.forEach(m => applyModelTransformChanges(m));
+
     // Dispose loaded models
     top.loadedEnvironmentModels.forEach(m => m.dispose());
 
@@ -700,19 +704,19 @@ export function showEnvironment(indexToShow, offsetCameraDegrees) {
     top.toggleVideoDome(environmentToShow.isVideo);
 
     // Load models
-    top.environments[indexToShow].models?.forEach(m => {
+    top.environments[indexToShow].models?.forEach((m,index) => {
         loadModel(
-            "_3dModel_"+ m.name, 
+            `_${getModelName(environmentToShow.name, m.name, index)}`, 
             m.url, 
             (loadedModel) => {
-                console.log("Successfully loaded "+ m.name);
                 top.loadedEnvironmentModels.push(loadedModel);
+                m.meshMarker = loadedModel;
                 loadedModel.position = new BABYLON.Vector3(m.pos.x, m.pos.y, m.pos.z);
                 loadedModel.rotation = new BABYLON.Vector3(m.rot.x, m.rot.y, m.rot.z);
                 loadedModel.scaling = new BABYLON.Vector3(m.scale.x, m.scale.y, m.scale.z);
             },
             (error) => {
-                console.log(`Failed loading model: ${m.url}. Error: `, error);
+                console.log(`Error when loading model: ${m.url}. Error: `, error);
             }
         );
     })
