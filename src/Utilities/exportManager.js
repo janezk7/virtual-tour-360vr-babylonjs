@@ -15,7 +15,7 @@ export function exportEnvironments(environments) {
         let tags = [];
         let models = [];
 
-        env.hotspots.forEach(m => 
+        env.hotspots?.forEach(m => 
             hotspots.push({
                 text: m.displayText,
                 isStepType: m.isStepType,
@@ -26,7 +26,7 @@ export function exportEnvironments(environments) {
             })
         );
 
-        env.tags.forEach(t => 
+        env.tags?.forEach(t => 
             tags.push({
                 text: t.displayText, // Hotspot display text
                 title: t.title,
@@ -38,7 +38,7 @@ export function exportEnvironments(environments) {
             })   
         );
 
-        env.models.forEach(m => {
+        env.models?.forEach(m => {
             models.push(createModelDefinition({
                 name: m.name, 
                 url: m.url,

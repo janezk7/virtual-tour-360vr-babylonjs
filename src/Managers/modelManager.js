@@ -35,6 +35,7 @@ function loadAndCacheModel() {
         top.modelManager.loadedModel = loadedModel;
         top.modelManager.loadedModelUrl = modelUrl;
         let size = 80;
+        loadedModel.rotationQuanternion = null;
         loadedModel.scaling = new BABYLON.Vector3(size,size,size);
         loadedModel.isPickable = false;
         loadedModel.visibility = 0.5;
@@ -43,7 +44,7 @@ function loadAndCacheModel() {
         // Stop animations
         loadedModel.getChildren((c) => top.scene.stopAnimation(c), false);
 
-        loadedModelFileInput.innerText = `Model loaded successfuly : ${loadedModel.name}`;
+        loadedModelFileInput.innerText = `Model loaded successfuly : ${modelUrl}`;
     }, (error) => {
         console.log(error);
         let errorMsg = error.message;
@@ -93,6 +94,10 @@ function modelManagerCastRayHandler() {
         // 2. place where hit was picked
         modelInstance.position = hit.pickedPoint;
         modelInstance.setEnabled(true);
+
+        // Force euler rotaiton representation (for inspector setting)
+        modelInstance.rotationQuanternion = null; 
+        modelInstance.rotation = new BABYLON.Vector3(0,0,0);
 
         // 4. show edit interface (update/reset field values)
         // Not yet implemented.

@@ -51,9 +51,7 @@ const showCameraAlphaIndicator_debug    = isDebug && false;
 const isVRMode_debug                    = isDebug && false;
 const showAxis_debug                    = isDebug && false;
 const createVrCursorOnStart_debug       = isDebug && false;
-if(isDebug) {
-    document.body.style.overflow = 'unset';
-}
+const hideDestinationList_debug = isDebug && true;
 
 console.log(isProduction ? "Production build" : "Development build");
 const domainDirectory = isProduction ? document.getElementById('serverAppDirectory').value : "./";
@@ -137,6 +135,8 @@ initializeAppSettings(appSettingsJsonUri, () => {
                 return;
             }
             showEnvironment(initialEnvironmentIndex);
+            var overlay = document.getElementById('canvasOverlay');
+            overlay && (overlay.style.display = "unset");
         });
     });
 });
@@ -753,6 +753,7 @@ export function populateDestinationSelect() {
 
 // Destination list shown below canvas
 export function populateDestinationList() {
+    if(hideDestinationList_debug) return;
     var envList = document.getElementById('envList');
     envList.innerHTML = "";
     let envCounter = 0;
