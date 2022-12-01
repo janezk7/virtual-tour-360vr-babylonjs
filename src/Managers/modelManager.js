@@ -19,7 +19,7 @@ function loadModel(name, modelUrl, modelReturnCallback, onErrorCallback) {
             //console.log("P: ", prog);
         },
         function (scene, message, exception) {
-            console.log("Something went wrong: ", message);
+            console.trace("Something went wrong: ", message);
             onErrorCallback({message, exception});
         }
     );

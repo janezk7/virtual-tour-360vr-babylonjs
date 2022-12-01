@@ -43,7 +43,7 @@
         <img id="img360" class="top" alt="360 image">
         <button type="button" id="enterButton" class="appButton">ENTER</button>
       </div>
-      <div id="registrationOverlay">
+      <div id="registrationOverlay" style="display: none;">
         <div class="loginForm" id="loginFormForm" onclick="event.stopPropagation();" onsubmit="(e) => e.preventDefault();">
 <!--          <img src="lock_black.png" alt="logo" /> -->
           <span class="loginClose" id="loginCloseX1">X</span>
@@ -77,7 +77,7 @@
           </div>
           <br/>
 
-          <div id="toolsContainer">
+          <div id="toolsContainer" style="visibility: collapse;">
             <!-- Tabs -->
             <ul class="nav nav-tabs" id="myTab" role="tablist">
               <li class="nav-item" role="presentation">
@@ -135,7 +135,7 @@
                   <label for="tagDescription" class="form-label" style="text-align: left;">Description</label>
                   <input name="tagDescription" class="form-control" id="inputTagDescription" width="250px" placeholder="description" value="Sample description" />
                   <label for="tagImageUrl" class="form-label" style="text-align: left;">Image url</label>
-                  <input name="tagImageUrl" class="form-control" id="inputTagImageUrl" width="250px" placeholder="image url" value="./Resources/sample-image.jpg" />
+                  <input name="tagImageUrl" class="form-control" id="inputTagImageUrl" width="250px" placeholder="image url" value="./Resources/sample-image.png" />
                   <label for="tagWebUrl" class="form-label" style="text-align: left;">Link (More info)</label>
                   <input name="tagWebUrl" class="form-control" id="inputWebsiteUrl" width="250px" placeholder="web url" value="https://www.google.com" />
 

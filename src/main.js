@@ -40,18 +40,36 @@ if(showDevelopmentTools) {
 }
 
 // Debug fields
-const isDebug = true;
+const isDebug = false;
 const showHiddenEnvironments            = isDebug && true;
 const showEnvironmentOnStart_debug      = isDebug && true;
 const environmentToShow_debug           = 4;
-const showInspector_debug               = isDebug && false;
+const showInspector_debug               = isDebug && true;
 const flycamera_debug                   = isDebug && false;
 const showInfoPanelOnStart_debug        = isDebug && false;
 const showCameraAlphaIndicator_debug    = isDebug && false;
 const isVRMode_debug                    = isDebug && false;
 const showAxis_debug                    = isDebug && false;
 const createVrCursorOnStart_debug       = isDebug && false;
-const hideDestinationList_debug = isDebug && true;
+const hideDestinationList_debug         = isDebug && false;
+
+// Document setup
+if(isProduction && isDeployingToDnn) {
+    //document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'unset';    
+}
+if(!isProduction) {
+    // Add bootstrap
+    var bsLink = document.createElement('link');
+    bsLink.href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css";
+    bsLink.rel="stylesheet";
+    bsLink.integrity = "sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3";
+    bsLink.crossOrigin="anonymous";
+    document.head.appendChild(bsLink);
+}
+if(showDevelopmentTools) {
+    document.getElementById('toolsContainer').style = "visibility: unset; height: unset";
+}
 
 console.log(isProduction ? "Production build" : "Development build");
 const domainDirectory = isProduction ? document.getElementById('serverAppDirectory').value : "./";
@@ -284,13 +302,13 @@ function createScene(engine, canvas) {
     top.videoDome = new BABYLON.VideoDome("videoDome", domainDirectory + "Resources/placeholderVideo.mp4", videoDomeOptions, scene);
 
     // Create picking dome and get dome mesh for raycasting (hotspots and tags)
-    let pickingDome = new BABYLON.PhotoDome("_raycastPickingDome", "./Resources/placeholder.jpg", { size: 500 }, scene);
+    let pickingDome = new BABYLON.PhotoDome("_raycastPickingDome", domainDirectory + "Resources/placeholder.jpg", { size: 500 }, scene);
     top.pickingDomeMesh = pickingDome.getChildMeshes()[0];
     top.pickingDomeMesh.visibility = 0;
     top.pickingDomeMesh.isPickable = false;
 
     // Create picking dome and get dome mesh for raycasting (3d models)
-    let pickingDomeModel = new BABYLON.PhotoDome("_raycastPickingDomeModel", './Resources/placeholder.jpg', { size: 250 }, scene);
+    let pickingDomeModel = new BABYLON.PhotoDome("_raycastPickingDomeModel", domainDirectory + "/Resources/placeholder.jpg", { size: 250 }, scene);
     top.pickingDomeModelMesh = pickingDomeModel.getChildMeshes()[0];
     top.pickingDomeModelMesh.visibility = 0;
     top.pickingDomeModelMesh.isPickable = false;
